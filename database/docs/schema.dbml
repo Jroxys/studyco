@@ -1,0 +1,154 @@
+// dbdiagram.io için: https://dbdiagram.io/d adresine yapıştırın.
+// Not: EXCLUDE kısıtı, trigger'lar ve partial index'ler DBML ile tam ifade edilemez; asıl kaynak migrations/up/*.sql
+
+Table departments {
+  department_id uuid [pk]
+  name varchar(120) [not null, unique]
+  is_active boolean [not null, default: true]
+  created_at timestamptz [not null]
+}
+
+Table users {
+  user_id uuid [pk]
+  department_id uuid [not null, ref: > departments.department_id]
+  first_name varchar(80) [not null]
+  last_name varchar(80) [not null]
+  birth_date date [not null]
+  email citext [not null, unique, note: 'büyük/küçük harf duyarsız']
+  phone varchar(30) [not null, unique, note: 'E.164: +90...']
+  password_hash text [not null, note: 'argon2id']
+  email_verified_at timestamptz
+  terms_accepted_at timestamptz [not null]
+  terms_version varchar(32) [not null]
+  anonymized_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table courses {
+  course_id uuid [pk]
+  department_id uuid [not null, ref: > departments.department_id]
+  course_name varchar(150) [not null]
+  is_active boolean [not null, default: true]
+  created_at timestamptz [not null]
+  indexes { (department_id, course_name) [unique] }
+}
+
+Table locations {
+  location_id uuid [pk]
+  name varchar(150) [not null, unique]
+  description text
+  latitude numeric(9,6)
+  longitude numeric(9,6)
+  is_active boolean [not null, default: true]
+}
+
+Table auth_tokens {
+  auth_token_id uuid [pk]
+  user_id uuid [not null, ref: > users.user_id]
+  purpose varchar(30) [not null, note: 'EMAIL_VERIFICATION | PASSWORD_RESET']
+  token_hash text [not null, note: 'HMAC-SHA256(sunucu_sırrı, kod); UNIQUE DEĞİL']
+  attempt_count smallint [not null, default: 0]
+  expires_at timestamptz [not null]
+  used_at timestamptz
+  revoked_at timestamptz
+  created_at timestamptz [not null]
+  indexes { (user_id, purpose) [unique, note: 'yalnızca used_at IS NULL AND revoked_at IS NULL'] }
+}
+
+Table listings {
+  listing_id uuid [pk]
+  teacher_id uuid [not null, ref: > users.user_id]
+  course_id uuid [not null, ref: > courses.course_id]
+  location_id uuid [not null, ref: > locations.location_id]
+  topic varchar(160) [not null]
+  description text
+  start_at timestamptz [not null]
+  end_at timestamptz [not null]
+  time_range tstzrange [note: 'GENERATED: [start_at, end_at)']
+  token_price smallint [not null, note: 'IN (0,1,2,3)']
+  status varchar(20) [not null, note: 'PUBLISHED | BOOKED | COMPLETED (EXPIRED türetilir)']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table lesson_requests {
+  request_id uuid [pk]
+  listing_id uuid [not null, ref: > listings.listing_id]
+  student_id uuid [not null, ref: > users.user_id]
+  teacher_id uuid [not null, ref: > users.user_id, note: 'ilandan snapshot']
+  time_range tstzrange [not null, note: 'ilandan snapshot']
+  request_status varchar(20) [not null, note: 'PENDING | ACCEPTED | REJECTED | AUTO_CANCELLED']
+  completion_status varchar(24) [not null, note: 'NOT_STARTED | AWAITING_CONFIRMATION | COMPLETED | MANUAL_REVIEW']
+  agreed_token_amount smallint
+  responded_at timestamptz
+  auto_cancel_reason varchar(32) [note: 'TIME_CONFLICT | LISTING_ALREADY_BOOKED | LISTING_EXPIRED']
+  student_completed_at timestamptz
+  teacher_completed_at timestamptz
+  confirmation_deadline_at timestamptz [note: 'ders bitişi + 24 saat']
+  settled_at timestamptz
+  settlement_basis varchar(30) [note: 'BOTH_CONFIRMED | TEACHER_ONLY_AT_DEADLINE | STUDENT_ONLY_AT_DEADLINE']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  indexes {
+    (listing_id, student_id) [unique, note: 'reddedilse de yeniden başvuru yok']
+    listing_id [unique, note: 'WHERE request_status = ACCEPTED']
+  }
+}
+
+Table accepted_slots {
+  slot_id uuid [pk]
+  user_id uuid [not null, ref: > users.user_id]
+  request_id uuid [not null, ref: > lesson_requests.request_id]
+  slot_role varchar(7) [not null, note: 'TEACHER | STUDENT']
+  time_range tstzrange [not null]
+  indexes { (request_id, slot_role) [unique] }
+  Note: 'EXCLUDE USING gist (user_id WITH =, time_range WITH &&) -> rolden bağımsız çakışma yasağı'
+}
+
+Table wallets {
+  wallet_id uuid [pk]
+  user_id uuid [not null, unique, ref: - users.user_id]
+  available_balance integer [not null, note: '>= 0; yalnızca defter trigger''ı değiştirir']
+  held_balance integer [not null, note: '>= 0']
+  updated_at timestamptz [not null]
+}
+
+Table wallet_transactions {
+  transaction_id uuid [pk]
+  wallet_id uuid [not null, ref: > wallets.wallet_id]
+  lesson_request_id uuid [ref: > lesson_requests.request_id]
+  transaction_type varchar(24) [not null, note: 'WELCOME_BONUS | HOLD | SETTLEMENT_DEBIT | SETTLEMENT_CREDIT']
+  available_delta integer [not null]
+  held_delta integer [not null]
+  idempotency_key varchar(120) [not null, unique]
+  created_at timestamptz [not null]
+  Note: 'APPEND-ONLY. UNIQUE(lesson_request_id, wallet_id, transaction_type) WHERE lesson_request_id IS NOT NULL'
+}
+
+Table conversations {
+  conversation_id uuid [pk]
+  lesson_request_id uuid [not null, unique, ref: - lesson_requests.request_id]
+  created_at timestamptz [not null]
+}
+
+Table messages {
+  message_id uuid [pk]
+  conversation_id uuid [not null, ref: > conversations.conversation_id]
+  sender_id uuid [not null, ref: > users.user_id]
+  body text [not null]
+  sent_at timestamptz [not null]
+  read_at timestamptz
+  indexes { (conversation_id, sent_at) }
+}
+
+Table reviews {
+  review_id uuid [pk]
+  lesson_request_id uuid [not null, ref: > lesson_requests.request_id]
+  reviewer_id uuid [not null, ref: > users.user_id]
+  reviewee_id uuid [not null, ref: > users.user_id]
+  rating smallint [not null, note: '1..5']
+  comment text
+  created_at timestamptz [not null]
+  indexes { (lesson_request_id, reviewer_id) [unique] }
+}

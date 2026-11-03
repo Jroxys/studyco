@@ -1,0 +1,618 @@
+department_name,course_name
+Bilgisayar Mühendisliği,Algoritma ve Programlama
+Bilgisayar Mühendisliği,Bilgisayar Bilimlerine Giriş
+Bilgisayar Mühendisliği,Temel Elektronik
+Bilgisayar Mühendisliği,Genel Fizik I
+Bilgisayar Mühendisliği,Genel Matematik I
+Bilgisayar Mühendisliği,Bilgisayar Destekli Lineer Cebir
+Bilgisayar Mühendisliği,Nesne Tabanlı Programlama
+Bilgisayar Mühendisliği,Genel Fizik II
+Bilgisayar Mühendisliği,Genel Matematik II
+Bilgisayar Mühendisliği,Veri Yapıları
+Bilgisayar Mühendisliği,Sayısal Elektronik
+Bilgisayar Mühendisliği,Ayrık İşlemsel Yapılar
+Bilgisayar Mühendisliği,Mesleki İngilizce I
+Bilgisayar Mühendisliği,Nesne Tabanlı Analiz ve Tasarım
+Bilgisayar Mühendisliği,Diferansiyel Denklemler
+Bilgisayar Mühendisliği,Sayısal Analiz
+Bilgisayar Mühendisliği,Bilgisayar Mimarisi
+Bilgisayar Mühendisliği,Mesleki İngilizce II
+Bilgisayar Mühendisliği,Otomata Teorisi
+Bilgisayar Mühendisliği,Elektronik Devreler ve Tasarımı
+Bilgisayar Mühendisliği,Programlama Dilleri
+Bilgisayar Mühendisliği,İşletim Sistemleri
+Bilgisayar Mühendisliği,Mikroişlemciler
+Bilgisayar Mühendisliği,Veritabanlarına Giriş
+Bilgisayar Mühendisliği,Olasılık ve İstatistik
+Bilgisayar Mühendisliği,İş Sağlığı ve Güvenliği I
+Bilgisayar Mühendisliği,Bilgisayar Grafik Programlamaya Giriş
+Bilgisayar Mühendisliği,Nesnelerin İnterneti
+Bilgisayar Mühendisliği,Optimizasyon
+Bilgisayar Mühendisliği,Mobil Programlama
+Bilgisayar Mühendisliği,Sinyaller ve Sistemler
+Bilgisayar Mühendisliği,Algoritma Analizi
+Bilgisayar Mühendisliği,İnternet Teknolojileri
+Bilgisayar Mühendisliği,Bilgisayar Ağları
+Bilgisayar Mühendisliği,İş Sağlığı ve Güvenliği II
+Bilgisayar Mühendisliği,Veritabanı Tasarım ve Uygulama
+Bilgisayar Mühendisliği,Yazılım Mühendisliği
+Bilgisayar Mühendisliği,Gömülü Sistemler
+Bilgisayar Mühendisliği,Görsel Programlama
+Bilgisayar Mühendisliği,Yapay Sinir Ağları
+Bilgisayar Mühendisliği,Veri Görselleştirme
+Bilgisayar Mühendisliği,Mühendislik Ekonomisi
+Bilgisayar Mühendisliği,İnternet Programlama
+Bilgisayar Mühendisliği,Makine Öğrenmesi
+Bilgisayar Mühendisliği,Paralel Programlama
+Bilgisayar Mühendisliği,Robot Programlama
+Bilgisayar Mühendisliği,Sayısal Görüntü İşleme
+Bilgisayar Mühendisliği,İşletim Sistemi Uygulamaları
+Bilgisayar Mühendisliği,Veri Madenciliği
+Bilgisayar Mühendisliği,Siber Güvenlik
+Bilgisayar Mühendisliği,Bulut Bilişim
+Bilgisayar Mühendisliği,Yazılım Test ve Doğrulama
+Bilgisayar Mühendisliği,Derin Öğrenme
+Bilgisayar Mühendisliği,Kalite Güvence ve Test Mühendisliği Temelleri
+Bilgisayar Mühendisliği,Kurumsal Kaynak Planlama (ERP) ve Turkcell Uygulamaları
+Yazılım Mühendisliği,Genel Fizik I
+Yazılım Mühendisliği,Genel Kimya
+Yazılım Mühendisliği,Genel Matematik I
+Yazılım Mühendisliği,Algoritma ve Programlama I
+Yazılım Mühendisliği,Yazılım Mühendisliğine Giriş
+Yazılım Mühendisliği,Genel Fizik II
+Yazılım Mühendisliği,Genel Matematik II
+Yazılım Mühendisliği,Algoritma ve Programlama II
+Yazılım Mühendisliği,Lineer Cebir
+Yazılım Mühendisliği,Diferansiyel Denklemler
+Yazılım Mühendisliği,Mesleki İngilizce I
+Yazılım Mühendisliği,Ayrık İşlemsel Yapılar
+Yazılım Mühendisliği,Nesneye Dayalı Programlama
+Yazılım Mühendisliği,Yazılım Gereksinim Analizi
+Yazılım Mühendisliği,Sayısal Tasarım
+Yazılım Mühendisliği,Mesleki İngilizce II
+Yazılım Mühendisliği,Sayısal Yöntemler
+Yazılım Mühendisliği,Görsel Programlama
+Yazılım Mühendisliği,Veri Yapıları
+Yazılım Mühendisliği,Yazılım Mimarisi ve Tasarımı
+Yazılım Mühendisliği,İş Sağlığı ve Güvenliği I
+Yazılım Mühendisliği,Yazılım Test ve Doğrulama
+Yazılım Mühendisliği,İşletim Sistemleri
+Yazılım Mühendisliği,Veri Tabanı Yönetim Sistemleri
+Yazılım Mühendisliği,Olasılık ve İstatistik
+Yazılım Mühendisliği,Optimizasyon
+Yazılım Mühendisliği,Veri Bilimi
+Yazılım Mühendisliği,Veri Gizleme
+Yazılım Mühendisliği,İş Sağlığı ve Güvenliği II
+Yazılım Mühendisliği,Yazılım Kalite Güvencesi
+Yazılım Mühendisliği,Web Tasarımı ve Programlama
+Yazılım Mühendisliği,Bilgisayar Ağları
+Yazılım Mühendisliği,Algoritma Analizi
+Yazılım Mühendisliği,Programlama Dilleri
+Yazılım Mühendisliği,Yapay Zeka
+Yazılım Mühendisliği,Bilgisayar Mimarisi
+Yazılım Mühendisliği,Mühendislik Ekonomisi
+Yazılım Mühendisliği,Bilgi Sistemleri Güvenliği
+Yazılım Mühendisliği,Oyun Tasarımı ve Programlama
+Yazılım Mühendisliği,Sayısal Görüntü İşleme
+Yazılım Mühendisliği,Nesnelerin İnterneti
+Yazılım Mühendisliği,Büyük Veri Analizi
+Yazılım Mühendisliği,Derin Öğrenme
+Yazılım Mühendisliği,Paralel Programlama
+Yazılım Mühendisliği,Mobil Programlama
+Yazılım Mühendisliği,Evrimsel Hesaplama
+Yazılım Mühendisliği,Yazılım Güvenliği
+Elektrik-Elektronik Mühendisliği,Elektrik-Elektronik Mühendisliği Temelleri I
+Elektrik-Elektronik Mühendisliği,Bilgisayar Programlamaya Giriş
+Elektrik-Elektronik Mühendisliği,Bilgisayar Destekli Teknik Çizim
+Elektrik-Elektronik Mühendisliği,Genel Fizik I
+Elektrik-Elektronik Mühendisliği,Genel Kimya
+Elektrik-Elektronik Mühendisliği,Genel Matematik I
+Elektrik-Elektronik Mühendisliği,Elektrik-Elektronik Mühendisliği Temelleri II
+Elektrik-Elektronik Mühendisliği,Elektrik-Elektronik Mühendisliği Malzeme Bilgisi
+Elektrik-Elektronik Mühendisliği,Bilgisayar Programlama
+Elektrik-Elektronik Mühendisliği,Temel Elektrik Laboratuvarı
+Elektrik-Elektronik Mühendisliği,Genel Fizik II
+Elektrik-Elektronik Mühendisliği,Lineer Cebir
+Elektrik-Elektronik Mühendisliği,Genel Matematik II
+Elektrik-Elektronik Mühendisliği,Elektromagnetik Alan Teorisi
+Elektrik-Elektronik Mühendisliği,Elektronik I
+Elektrik-Elektronik Mühendisliği,Devre Teorisi I
+Elektrik-Elektronik Mühendisliği,Elektronik Laboratuvarı I
+Elektrik-Elektronik Mühendisliği,Sayısal Elektronik
+Elektrik-Elektronik Mühendisliği,Mühendislik Matematiği
+Elektrik-Elektronik Mühendisliği,Olasılık ve İstatistik
+Elektrik-Elektronik Mühendisliği,Sayısal Elektronik Laboratuvarı
+Elektrik-Elektronik Mühendisliği,Elektromagnetik Dalga Teorisi
+Elektrik-Elektronik Mühendisliği,Sayısal Çözümleme
+Elektrik-Elektronik Mühendisliği,Elektronik Laboratuvarı II
+Elektrik-Elektronik Mühendisliği,Devre Teorisi II
+Elektrik-Elektronik Mühendisliği,Elektronik II
+Elektrik-Elektronik Mühendisliği,Mikroişlemciler
+Elektrik-Elektronik Mühendisliği,Diferansiyel Denklemler
+Elektrik-Elektronik Mühendisliği,Elektrik Makinaları I
+Elektrik-Elektronik Mühendisliği,Haberleşme I
+Elektrik-Elektronik Mühendisliği,Otomatik Kontrol I
+Elektrik-Elektronik Mühendisliği,Sinyaller ve Sistemler
+Elektrik-Elektronik Mühendisliği,Elektrik Makinaları Laboratuvarı I
+Elektrik-Elektronik Mühendisliği,Elektrik Enerjisi Üretim ve İletimi
+Elektrik-Elektronik Mühendisliği,İş Sağlığı ve Güvenliği I
+Elektrik-Elektronik Mühendisliği,Uygulamalı Girişimcilik
+Elektrik-Elektronik Mühendisliği,İş Hukuku
+Elektrik-Elektronik Mühendisliği,Bilimsel ve Etik Araştırma
+Elektrik-Elektronik Mühendisliği,Elektrik Makinaları II
+Elektrik-Elektronik Mühendisliği,Otomatik Kontrol II
+Elektrik-Elektronik Mühendisliği,Elektrik Enerji Dağıtımı
+Elektrik-Elektronik Mühendisliği,Haberleşme II
+Elektrik-Elektronik Mühendisliği,Yüksek Gerilim Tekniği
+Elektrik-Elektronik Mühendisliği,Elektrik Makinaları Laboratuvarı II
+Elektrik-Elektronik Mühendisliği,İş Sağlığı ve Güvenliği II
+Elektrik-Elektronik Mühendisliği,Aydınlatma Tekniği
+Elektrik-Elektronik Mühendisliği,Güç Elektroniği
+Elektrik-Elektronik Mühendisliği,Mühendislik Ekonomisi
+Elektrik-Elektronik Mühendisliği,Proses Enstrumantasyon
+Elektrik-Elektronik Mühendisliği,Veri Toplama ve Yönetsel Kontrol (SCADA)
+Elektrik-Elektronik Mühendisliği,Robotik Sistemler
+Elektrik-Elektronik Mühendisliği,Elektrikle Tahrik
+Elektrik-Elektronik Mühendisliği,Elektrik Projesi Uygulamaları ve Mevzuatı
+Elektrik-Elektronik Mühendisliği,Yenilenebilir Enerji Kaynakları
+Elektrik-Elektronik Mühendisliği,Mikrodalga Tekniği
+Elektrik-Elektronik Mühendisliği,Mikrodenetleyici ve Uygulamaları
+Elektrik-Elektronik Mühendisliği,Gömülü Sistemler
+Elektrik-Elektronik Mühendisliği,Programlanabilir Mantık Denetleyiciler (PLC)
+Makine Mühendisliği,Genel Fizik I
+Makine Mühendisliği,Genel Kimya
+Makine Mühendisliği,Makine Mühendisliğine Giriş
+Makine Mühendisliği,Teknik Resim I
+Makine Mühendisliği,Bilgisayar Programlama
+Makine Mühendisliği,Genel Matematik I
+Makine Mühendisliği,Genel Fizik II
+Makine Mühendisliği,Teknik Resim II
+Makine Mühendisliği,Mühendislikte Bilgisayar Uygulamaları
+Makine Mühendisliği,Statik
+Makine Mühendisliği,Genel Matematik II
+Makine Mühendisliği,Malzeme I
+Makine Mühendisliği,Termodinamik I
+Makine Mühendisliği,Dinamik I
+Makine Mühendisliği,Sayısal Analiz
+Makine Mühendisliği,Mukavemet I
+Makine Mühendisliği,Mühendislik Matematiği
+Makine Mühendisliği,İstatistik
+Makine Mühendisliği,Dinamik II
+Makine Mühendisliği,Malzeme II
+Makine Mühendisliği,Mukavemet II
+Makine Mühendisliği,Termodinamik II
+Makine Mühendisliği,Takım Tezgahları
+Makine Mühendisliği,Bilgisayar Destekli Çizim
+Makine Mühendisliği,Diferansiyel Denklemler
+Makine Mühendisliği,Mekanizma Tekniği
+Makine Mühendisliği,Makina Elemanları I
+Makine Mühendisliği,Isı Transferi I
+Makine Mühendisliği,Akışkanlar Mekaniği I
+Makine Mühendisliği,Otomatik Kontrol
+Makine Mühendisliği,Üretim Yöntemleri
+Makine Mühendisliği,Makina Laboratuvarı I
+Makine Mühendisliği,İş Sağlığı ve Güvenliği I
+Makine Mühendisliği,Makina Elemanları II
+Makine Mühendisliği,Makine Dinamiği
+Makine Mühendisliği,Isıtma Tekniği ve Bina Tesisatı
+Makine Mühendisliği,Makina Laboratuvarı II
+Makine Mühendisliği,Hidrolik-Pnömatik
+Makine Mühendisliği,Elektrik ve Elektronik Bilgisi
+Makine Mühendisliği,Teknoloji-İnovasyon ve Girişimcilik
+Makine Mühendisliği,İş Sağlığı ve Güvenliği II
+Makine Mühendisliği,Tahribatsız Muayene
+Makine Mühendisliği,Klima
+Makine Mühendisliği,Isı Transferi II
+Makine Mühendisliği,Akışkanlar Mekaniği II
+Makine Mühendisliği,Buhar Kazanları
+Makine Mühendisliği,Transport Tekniği
+Makine Mühendisliği,Tasarım ve Malzeme Seçimi
+Makine Mühendisliği,Plastik Şekil Verme
+Makine Mühendisliği,Robotiğe Giriş
+Makine Mühendisliği,Yenilenebilir Enerji Kaynakları
+Makine Mühendisliği,Motorlu Taşıtlar
+Makine Mühendisliği,Motorlar
+Makine Mühendisliği,Soğutma
+Makine Mühendisliği,Kaynak Tekniği
+Makine Mühendisliği,Hidrolik Makinalar
+Makine Mühendisliği,Mekanik Titreşimler
+Makine Mühendisliği,Enerji Tasarrufu ve Uygulamaları
+Makine Mühendisliği,Bilgisayar Destekli Tasarım ve İmalat
+Makine Mühendisliği,Kompozit Malzemelere Giriş
+Makine Mühendisliği,Termik Turbo Makinalar
+Makine Mühendisliği,Yakıt Hücreleri
+Makine Mühendisliği,Hesaplamalı Akışkanlar Dinamiğine Giriş
+Makine Mühendisliği,Demiryolu Mühendisliği ve Sürdürülebilir Ulaşım
+Makine Mühendisliği,Bilgisayar Destekli Yapısal Analiz
+Makine Mühendisliği,Roket Tasarımı
+Makine Mühendisliği,Elektrikli-Hibrit Araç Teknolojisi
+Makine Mühendisliği,İşletme Yönetimi
+Makine Mühendisliği,İş Hukuku
+Makine Mühendisliği,Mühendislik Etiği
+Makine Mühendisliği,Proje Yönetimi
+Makine Mühendisliği,Toplam Kalite Yönetimi
+Makine Mühendisliği,Mühendislik Ekonomisi
+İşletme,Muhasebe I
+İşletme,Hukukun Temel Kavramları
+İşletme,Matematik I
+İşletme,İşletme Bilimine Giriş
+İşletme,İktisada Giriş I
+İşletme,Muhasebe II
+İşletme,Borçlar Hukuku
+İşletme,Matematik II
+İşletme,Örgütsel Davranış
+İşletme,İktisada Giriş II
+İşletme,Ticaret Hukuku I
+İşletme,Envanter-Bilanço
+İşletme,Pazarlamaya Giriş
+İşletme,Yönetim ve Organizasyon
+İşletme,İstatistik I
+İşletme,Mikro İktisat
+İşletme,Ticaret Hukuku II
+İşletme,İstatistik II
+İşletme,Makro İktisat
+İşletme,Tüketici Davranışları
+İşletme,Bütünleşik Pazarlama İletişimi
+İşletme,Hizmet Pazarlaması
+İşletme,Para-Banka
+İşletme,Maliyet Muhasebesi I
+İşletme,Finansal Yönetim I
+İşletme,Bilgisayarlı Muhasebe
+İşletme,İnsan Kaynakları Yönetimi
+İşletme,Girişimcilik
+İşletme,Üretim Yönetimi
+İşletme,Doğrudan Pazarlama
+İşletme,Muhasebe Denetimi
+İşletme,İşletme Politikası
+İşletme,Maliyet Muhasebesi II
+İşletme,Finansal Yönetim II
+İşletme,Uluslararası İşletmecilik
+İşletme,Tedarik Zinciri Yönetimi
+İşletme,İşletme Matematiği
+İşletme,Marka Yönetimi
+İşletme,İstatistiksel Kalite Kontrolü
+İşletme,Lojistik Yönetimi
+İşletme,Yöneylem Araştırması I
+İşletme,Yatırım ve Proje
+İşletme,Uluslararası Pazarlama
+İşletme,Sigorta Hukuku
+İşletme,Kamu Maliyesi
+İşletme,Kooperatifçilik
+İşletme,İşletme Etiği
+İşletme,Yöneylem Araştırması II
+İşletme,Yönetim Muhasebesi
+İşletme,Türk Vergi Sistemi
+İşletme,İş Hukuku
+İşletme,Sermaye Piyasası
+İşletme,İcra ve İflas Hukuku
+İşletme,Satış Yönetimi ve Teknikleri
+İktisat,İktisada Giriş I
+İktisat,İşletme Bilimine Giriş
+İktisat,Matematik I
+İktisat,Muhasebe I
+İktisat,Hukukun Temel Kavramları
+İktisat,İktisada Giriş II
+İktisat,İktisat Tarihi
+İktisat,Matematik II
+İktisat,Muhasebe II
+İktisat,Anayasa Hukuku
+İktisat,Mikro İktisat
+İktisat,İktisadi Matematik I
+İktisat,İstatistik I
+İktisat,Kamu Maliyesi
+İktisat,Borçlar Hukuku
+İktisat,Envanter-Bilanço
+İktisat,Makro İktisat
+İktisat,İktisadi Matematik II
+İktisat,İstatistik II
+İktisat,Çalışma Ekonomisi
+İktisat,Ticaret Hukuku
+İktisat,Pazarlama İlkeleri
+İktisat,Uluslararası İktisat I
+İktisat,Para-Banka
+İktisat,Türk İktisat Tarihi
+İktisat,Ekonometri I
+İktisat,Maliyet Muhasebesi
+İktisat,İdare Hukuku
+İktisat,İktisat Sosyolojisi
+İktisat,Mesleki İngilizce I
+İktisat,Uluslararası İktisat II
+İktisat,İktisadi Düşünceler Tarihi
+İktisat,Ekonometri II
+İktisat,Maliye Politikası
+İktisat,İktisadi Analiz
+İktisat,Sosyal Bilimlerde Yöntem
+İktisat,Tarım Ekonomisi
+İktisat,Mesleki İngilizce II
+İktisat,Türkiye Ekonomisi
+İktisat,İktisat Politikası
+İktisat,Kamu Ekonomisi
+İktisat,Uluslararası İktisadi Kuruluşlar
+İktisat,Vergi Hukuku
+İktisat,Finansal Yönetim
+İktisat,Güncel Ekonomik Sorunlar
+İktisat,Uygulamalı Ekonometri
+İktisat,Dünya Ekonomisi
+İktisat,İktisadi Büyüme ve Kalkınma
+İktisat,İktisadi Entegrasyonlar ve AB
+İktisat,İş Hukuku
+İktisat,Sermaye Piyasası
+İktisat,Türk Vergi Sistemi
+İktisat,Oyun Teorisi
+İktisat,Doğal Kaynaklar ve Çevre Ekonomisi
+Hukuk,Hukuka Giriş
+Hukuk,Medeni Hukuk
+Hukuk,Anayasa Hukuku
+Hukuk,İslam Hukuku
+Hukuk,Roma Hukuku
+Hukuk,İktisat
+Hukuk,Mikro İktisat
+Hukuk,Seçim Hukuku
+Hukuk,Kamu Maliyesi
+Hukuk,Genel Muhasebe
+Hukuk,Medeniyet Tarihi
+Hukuk,Hukuk ve Edebiyat I
+Hukuk,Felsefe
+Hukuk,"Hukuk, Etik ve Meslek Etikleri"
+Hukuk,Makro İktisat
+Hukuk,Mantık
+Hukuk,Siyasi Partiler Hukuku
+Hukuk,İnsan Hakları Hukuku
+Hukuk,Siyasal Düşünceler Tarihi
+Hukuk,Bilgisayar Operatörlüğü
+Hukuk,Sosyoloji
+Hukuk,Hukukta Kadın
+Hukuk,Borçlar Hukuku Genel Hükümler
+Hukuk,Ceza Hukuku Genel Hükümler
+Hukuk,İdare Hukuku
+Hukuk,Devletler Genel Hukuku
+Hukuk,Genel Kamu Hukuku
+Hukuk,Hukuk Felsefesi ve Sosyolojisi
+Hukuk,Türk Hukuk Tarihi
+Hukuk,Hukukta Etkili İletişim
+Hukuk,Anayasa Yargısı
+Hukuk,Siyasi Tarih
+Hukuk,Tarım Hukuku
+Hukuk,Adalet Psikolojisi
+Hukuk,Suç ve Ceza Felsefesi
+Hukuk,Hukuk ve Sinema I
+Hukuk,Hukuk Metodolojisi
+Hukuk,Siyaset Bilimi
+Hukuk,Enerji Hukuku
+Hukuk,Para Hukuku
+Hukuk,Spor Hukuku
+Hukuk,Yapay Zeka ve Otonom Araçlar
+Hukuk,İslam Özel Hukuku
+Hukuk,Hukuk ve Sinema II
+Hukuk,Hukuk ve Hitabet
+Hukuk,Hava ve Uzay Hukuku
+Hukuk,Borçlar Hukuku Özel Hükümler
+Hukuk,Ceza Hukuku Özel Hükümler
+Hukuk,Medeni Usul Hukuku
+Hukuk,Ticaret Hukuku
+Hukuk,Eşya Hukuku
+Hukuk,Vergi Hukuku
+Hukuk,İdari Yargılama Hukuku
+Hukuk,Tüketici Hukuku
+Hukuk,Kriminoloji
+Hukuk,Çevre Hukuku
+Hukuk,Çocuk Hukuku
+Hukuk,Fikri ve Sınai Mülkiyet Hukuku
+Hukuk,Avrupa Birliği Hukuku
+Hukuk,Uluslararası Ticaret Hukuku
+Hukuk,Deniz Hukuku
+Hukuk,Kamu Personel Hukuku
+Hukuk,Kabahatler Hukuku
+Hukuk,Kamulaştırma Hukuku
+Hukuk,Hukuk Uygulamaları I
+Hukuk,Ahlak Felsefesi
+Hukuk,Akademik Okuma Yazma I
+Hukuk,Genel Hukuk Tarihi
+Hukuk,Yargı Etiği
+Hukuk,Mülteci Hukuku ve Uluslararası Koruma
+Hukuk,İnfaz ve Denetimli Serbestlik Hukuku
+Hukuk,Rekabet Hukuku
+Hukuk,İnşaat Hukuku
+Hukuk,Disiplin Hukuku
+Hukuk,Tebligat Hukuku ve UYAP
+Hukuk,İsimsiz Sözleşmeler
+Hukuk,Türk Vergi Sistemi
+Hukuk,Hukuk Uygulamaları II
+Hukuk,Akademik Okuma Yazma II
+Hukuk,Hukuk Dili ve Adli Yazışma
+Hukuk,Marka Hukuku
+Hukuk,Ceza Muhakemesi Hukuku
+Hukuk,Devletler Özel Hukuku
+Hukuk,Deniz Ticareti ve Sigorta Hukuku
+Hukuk,Miras Hukuku
+Hukuk,İcra ve İflas Hukuku
+Hukuk,Kıymetli Evrak Hukuku
+Hukuk,Bilişim ve Teknoloji Hukuku
+Hukuk,Sosyal Güvenlik Hukuku
+Hukuk,İş Hukuku
+Hukuk,Vergi Yargılaması ve Vergi İcra Hukuku
+Hukuk,Ceza Adaleti Sistemi
+Hukuk,Avukatlık ve Noterlik Hukuku
+Hukuk,Göç Hukuku
+Hukuk,İletişim Hukuku
+Hukuk,Hukuk Uygulamaları III
+Hukuk,Sermaye Piyasası Hukuku
+Hukuk,Mesleki Yabancı Dil I
+Hukuk,Kişisel Veri Koruma Hukuku
+Hukuk,Para ve Banka Hukuku
+Hukuk,Mahalli İdareler Hukuku
+Hukuk,İş Sağlığı ve Güvenliği
+Hukuk,Hukuk Klinikleri II
+Hukuk,Tıp Hukuku
+Hukuk,Alternatif Uyuşmazlık Çözüm Yöntemleri
+Hukuk,İnsan Haklarının Korunması (Bireysel Başvuru)
+Hukuk,Hukukta Argümantasyon ve Mahkeme Kararlarında Gerekçe
+Hukuk,Çalışma Hayatında Psikolojik Taciz
+Hukuk,Sosyal Sigorta Hukuku
+Hukuk,Hukuk Uygulamaları IV
+Hukuk,Adli Tıp
+Hukuk,Hukukta Araştırma Yöntemleri
+Hukuk,Mesleki Yabancı Dil II
+Hukuk,İmar Hukuku
+Hukuk,Milletlerarası Tahkim
+Hukuk,Taşıma Hukuku
+Hukuk,İş Hukuku Uygulamaları
+Tıp,Tıbbi İngilizce
+Tıp,İç Hastalıkları
+Tıp,Çocuk Sağlığı ve Hastalıkları
+Tıp,Genel Cerrahi
+Tıp,Kadın Hastalıkları ve Doğum
+Tıp,Göğüs Hastalıkları
+Tıp,Kardiyoloji
+Tıp,Radyoloji
+Tıp,Çocuk Cerrahisi
+Tıp,Kanıta Dayalı Tıp
+Tıp,Göğüs Cerrahisi
+Tıp,Nükleer Tıp
+Tıp,Radyasyon Onkolojisi
+Tıp,Çocuk ve Ergen Ruh Sağlığı Hastalıkları
+Tıp,Plastik ve Rekonstrüktif Cerrahi
+Tıp,Adli Tıp
+Tıp,Tıbbi Genetik
+Tıp,Histoloji ve Embriyoloji
+Tıp,Dermatoloji
+Tıp,Ortopedi ve Travmatoloji
+Tıp,Nöroşirürji
+Tıp,Nöroloji
+Tıp,Üroloji
+Tıp,Göz Hastalıkları
+Tıp,Kulak Burun Boğaz Hastalıkları
+Tıp,Anesteziyoloji ve Reanimasyon
+Tıp,Psikiyatri
+Tıp,Klinik Bakteriyoloji İnfeksiyon Hastalıkları
+Tıp,Fizik Tedavi ve Rehabilitasyon
+Tıp,Klinik Farmakoloji
+Tıp,Kalp Damar Cerrahisi
+Tıp,Acil Tıp
+Tıp,Klinik Anatomi
+Tıp,Klinik Fizyoloji
+Tıp,Sağlık Yönetimi
+Tıp,Patoloji
+Tıp,Klinik Mikrobiyoloji
+Tıp,Klinik Biyokimya
+Tıp,Acil Cerrahi
+Tıp,Halk Sağlığı
+Tıp,Aile Hekimliği
+Tıp,Cerrahi
+Psikoloji,Felsefeye Giriş
+Psikoloji,Psikolojiye Giriş I
+Psikoloji,Psikolojide İstatistik I
+Psikoloji,Eleştirel Düşünme
+Psikoloji,Sosyolojiye Giriş
+Psikoloji,Psikolojiye Giriş II
+Psikoloji,Stres Yönetimi
+Psikoloji,Psikolojide İstatistik II
+Psikoloji,Fizyolojik Psikoloji
+Psikoloji,Sosyal ve Kültürel Antropoloji
+Psikoloji,Araştırma Yöntemleri I
+Psikoloji,Gelişim Psikolojisi I
+Psikoloji,Sosyal Psikoloji I
+Psikoloji,Öğrenme Psikolojisi
+Psikoloji,İnsan Hakları
+Psikoloji,Bilim Felsefesi
+Psikoloji,Çevre Psikolojisi
+Psikoloji,Kültürel Psikoloji
+Psikoloji,Etkili İletişim
+Psikoloji,Nöropsikoloji I
+Psikoloji,Klinik Psikoloji I
+Psikoloji,Psikolojide Akademik İngilizce I
+Psikoloji,Araştırma Yöntemleri II
+Psikoloji,Gelişim Psikolojisi II
+Psikoloji,Sosyal Psikoloji II
+Psikoloji,"Psikolojide Okuma, Yazma ve Sunum Becerileri"
+Psikoloji,Duyum ve Algı
+Psikoloji,Klinik Psikoloji II
+Psikoloji,Psikolojide Akademik İngilizce II
+Psikoloji,Yakın İlişkiler Psikolojisi
+Psikoloji,Pozitif Psikoloji
+Psikoloji,Nöropsikoloji II
+Psikoloji,Evrimsel Psikoloji
+Psikoloji,Kişilik Kuramları I
+Psikoloji,Ölçme Teknikleri
+Psikoloji,Psikopatoloji I
+Psikoloji,Psikolojik Testler
+Psikoloji,Psikoterapi Kuramları I
+Psikoloji,Gelişim Psikolojisinde Seçme Konular
+Psikoloji,Sosyal Psikolojide Seçme Konular
+Psikoloji,Psikoloji Tarihi
+Psikoloji,Gözlem ve Görüşme Teknikleri I
+Psikoloji,İşaret Dili I
+Psikoloji,Kişilerarası İlişkiler
+Psikoloji,Deneysel Psikoloji
+Psikoloji,Kişilik Kuramları II
+Psikoloji,Psikopatoloji II
+Psikoloji,Bilişsel Psikoloji
+Psikoloji,Psikoterapi Kuramları II
+Psikoloji,Toplumsal Cinsiyet
+Psikoloji,Rehabilitasyon Psikolojisi
+Psikoloji,Siyaset Psikolojisi
+Psikoloji,Engellilik Politikaları ve Engellilere Yaklaşım
+Psikoloji,Travma ve Afet Psikolojisi
+Psikoloji,Gözlem ve Görüşme Teknikleri II
+Psikoloji,İşaret Dili II
+Psikoloji,Aile ve Gelişim
+Psikoloji,Psikolojik Test Uygulamaları
+Psikoloji,Psikoloji ve Sanat
+Psikoloji,Endüstri ve Örgüt Psikolojisi
+Psikoloji,Sağlık Psikolojisi
+Psikoloji,Adli Psikoloji
+Psikoloji,Akran İlişkileri ve Gelişim
+Psikoloji,Okul Öncesi Çocuk Gelişimi
+Psikoloji,Göç Psikolojisi
+Psikoloji,Psikoloji ve Sinirbilim
+Psikoloji,Grup Dinamikleri ve Süreçleri
+Psikoloji,Bağımlılık Psikolojisi
+Psikoloji,Çocuk İstismar ve İhmali
+Psikoloji,Bilişsel Psikolojide Seçme Konular
+Psikoloji,Nöropsikolojik Testler I
+Psikoloji,Aile Terapisi Kuramları I
+Psikoloji,Bilimsel Araştırma Uygulamaları ve SPSS I
+Psikoloji,Trafik Psikolojisi
+Psikoloji,Oyun Terapisi
+Psikoloji,Aile Terapisine Giriş
+Psikoloji,Bilişsel Davranışçı Terapilere Giriş
+Psikoloji,Şema Terapiye Geçiş
+Psikoloji,Klinik Psikolojide Seçme Konular
+Psikoloji,Psikolojide Meslek Etiği
+Psikoloji,Çocukluk ve Ergenlik Dönemi Psikolojik Sorunlar
+Psikoloji,Grup Psikoterapileri
+Psikoloji,Duygu Psikolojisi
+Psikoloji,Yaşlılık Psikolojisi
+Psikoloji,Spor Psikolojisi
+Psikoloji,Çift ve Evlilik Terapisi
+Psikoloji,Psikofarmakoloji
+Psikoloji,Modernleşme ve Dezavantajlı Gruplar
+Psikoloji,Nitel Araştırma Yöntemleri
+Psikoloji,Endüstri ve Örgüt Psikolojisinde Seçme Konular
+Psikoloji,Aile Terapisi Kuramları II
+Psikoloji,Bilimsel Araştırma Uygulamaları ve SPSS II
+Psikoloji,Nöropsikolojik Testler II
+Psikoloji,Din ve Maneviyat Psikolojisi
+Psikoloji,Psikopatolojilerde Bilişsel Davranışçı Terapiler
+Psikoloji,Şema Terapide İleri Düzey Konular
+Tıp,Anatomi
+Tıp,Fizyoloji
+Tıp,Biyokimya
+Tıp,Tıbbi Biyoloji
+Tıp,Biyofizik
+Tıp,Biyoistatistik
+Tıp,Mikrobiyoloji
+Tıp,Parazitoloji
+Tıp,Farmakoloji
+Tıp,Tıbbi Terminoloji
+Tıp,Davranış Bilimleri
+Tıp,Deontoloji
+Tıp,Tıp Tarihi ve Etik
+Tıp,Organik Kimya
+Tıp,Doku Biyolojisi Ders Kurulu
+Tıp,Dolaşım Sistemi Ders Kurulu
+Tıp,Solunum Sistemi Ders Kurulu
+Tıp,Duyu ve Sinir Sistemleri Ders Kurulu
+Tıp,Metabolizma Ders Kurulu
+Tıp,Endokrin ve Üreme Sistemi Ders Kurulu
+Tıp,Hastalıkların Biyolojik Temelleri I
