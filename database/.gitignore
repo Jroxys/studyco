@@ -1,0 +1,8 @@
+.env
+*.log
+.DS_Store
+# Yalnızca bu Mac için yardımcı betikler ve yerel çıktılar (repoya girmez)
+*.command
+logs/
+seeds/data/ham/
+.idea/
