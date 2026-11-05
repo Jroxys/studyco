@@ -1,5 +1,8 @@
 enum PostType { tutoring }
 
+/// Known backend values only: PUBLISHED and BOOKED. Unknown values stay closed.
+enum PostStatus { published, booked, unknown }
+
 enum PostSubject { coding, mathematics, general }
 
 enum PostOffer { coffee, free }
@@ -7,6 +10,10 @@ enum PostOffer { coffee, free }
 class Post {
   const Post({
     required this.id,
+    this.status = PostStatus.published,
+    this.rawServerStatus,
+    this.authorId,
+    this.applicationCount,
     required this.title,
     this.topic,
     this.department,
@@ -22,6 +29,10 @@ class Post {
     this.coffeeCount = 0,
   });
   final String id;
+  final PostStatus status;
+  final String? rawServerStatus;
+  final String? authorId;
+  final int? applicationCount;
   final String title;
   // Nullable for older listings; Create Post requires a nonblank topic.
   final String? topic;
@@ -37,6 +48,30 @@ class Post {
   final PostSubject subject;
   final PostOffer offer;
   final int coffeeCount;
+
+  Post copyWith({PostStatus? status}) => Post(
+    id: id,
+    authorId: authorId,
+    applicationCount: applicationCount,
+    title: title,
+    topic: topic,
+    department: department,
+    description: description,
+    authorName: authorName,
+    createdAt: createdAt,
+    startsAt: startsAt,
+    endsAt: endsAt,
+    location: location,
+    type: type,
+    subject: subject,
+    offer: offer,
+    coffeeCount: coffeeCount,
+    rawServerStatus: rawServerStatus,
+    status: status ?? this.status,
+  );
+
+  /// Time-based expiry only; this does not confirm lesson completion.
+  bool isExpiredAt(DateTime now) => !endsAt.isAfter(now);
 
   String get typeLabel => switch (type) {
     PostType.tutoring => 'Özel Ders',

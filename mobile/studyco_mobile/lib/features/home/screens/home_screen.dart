@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: AnimatedBuilder(
               animation: widget.repository,
               builder: (context, _) {
-                final matchingPosts = widget.repository.posts
+                final matchingPosts = widget.repository.discoverablePosts
                   .where((post) => post.type == PostType.tutoring)
                   .toList(growable: false)..sort((a, b) {
                   final byCreatedAt = b.createdAt.compareTo(a.createdAt);

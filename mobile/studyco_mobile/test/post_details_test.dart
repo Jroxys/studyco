@@ -15,14 +15,21 @@ Post fixture({
   String? topic = 'Bağlı Listeler',
 }) => Post(
   id: id,
+  authorId: 'mock-detail-teacher',
   title: id == 'first' ? 'Veri Yapıları' : 'Lineer Cebir',
   authorName: id == 'first' ? 'Ayşe Demir' : 'Mehmet Kaya',
   department: department,
   topic: topic,
   description: description,
   createdAt: DateTime.utc(2026, 10, id == 'first' ? 28 : 27, 9),
-  startsAt: DateTime(2026, 11, id == 'first' ? 3 : 4, 14, 15),
-  endsAt: DateTime(2026, 11, id == 'first' ? 3 : 4, 15, 45),
+  startsAt: DateTime(
+    DateTime.now().year + 1,
+    11,
+    id == 'first' ? 3 : 4,
+    14,
+    15,
+  ),
+  endsAt: DateTime(DateTime.now().year + 1, 11, id == 'first' ? 3 : 4, 15, 45),
   location: id == 'first' ? 'Espressolab' : 'Colombia',
   type: PostType.tutoring,
   subject: id == 'first' ? PostSubject.coding : PostSubject.mathematics,
@@ -85,6 +92,7 @@ void main() {
                           MaterialPageRoute(
                             builder:
                                 (_) => PostDetailsScreen(
+                                  user: sampleHomeUser,
                                   post: post,
                                   repository: repository,
                                 ),
@@ -153,7 +161,11 @@ void main() {
         expect(find.text(selected.description!), findsOneWidget);
         await revealDetail(tester, 'detail-date');
         expect(
-          find.text(id == 'first' ? '3 Kasım 2026' : '4 Kasım 2026'),
+          find.text(
+            id == 'first'
+                ? '3 Kasım ${DateTime.now().year + 1}'
+                : '4 Kasım ${DateTime.now().year + 1}',
+          ),
           findsOneWidget,
         );
         expect(find.text('14:15–15:45'), findsOneWidget);
@@ -172,10 +184,7 @@ void main() {
         expect(find.text('Mesaj Gönder'), findsNothing);
         await tester.tap(find.byKey(const ValueKey('apply-post')));
         await tester.pumpAndSettle();
-        expect(
-          find.text('Başvuru işlemi henüz kullanıma hazır değil.'),
-          findsOneWidget,
-        );
+        expect(find.text('Başvurun kaydedildi.'), findsOneWidget);
         expect(repository.posts, [second, first]);
         expect(find.byType(PostDetailsScreen), findsOneWidget);
         await tester.tap(find.byTooltip('Geri'));
@@ -211,7 +220,11 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: AppTheme.light,
-            home: PostDetailsScreen(post: post, repository: repository),
+            home: PostDetailsScreen(
+              post: post,
+              repository: repository,
+              user: sampleHomeUser,
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -238,7 +251,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
-          home: PostDetailsScreen(post: post, repository: repository),
+          home: PostDetailsScreen(
+            post: post,
+            repository: repository,
+            user: sampleHomeUser,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -307,6 +324,7 @@ void main() {
                           MaterialPageRoute(
                             builder:
                                 (_) => PostDetailsScreen(
+                                  user: sampleHomeUser,
                                   post: post,
                                   repository: repository,
                                 ),
@@ -362,7 +380,11 @@ void main() {
                   ).copyWith(textScaler: TextScaler.linear(scale)),
                   child: child!,
                 ),
-            home: PostDetailsScreen(post: post, repository: repository),
+            home: PostDetailsScreen(
+              post: post,
+              repository: repository,
+              user: sampleHomeUser,
+            ),
           ),
         );
         await tester.pumpAndSettle();

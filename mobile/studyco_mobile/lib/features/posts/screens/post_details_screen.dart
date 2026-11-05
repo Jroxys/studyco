@@ -1,17 +1,33 @@
 import 'package:flutter/material.dart';
 import '../models/post.dart';
 import '../domain/posts_repository.dart';
+import '../../profile/models/user_profile.dart';
+import '../../applications/domain/applications_repository.dart';
+import '../../applications/models/application.dart';
+import '../widgets/post_owner_card.dart';
 
 /// Read-only detail view, reusable by Home and future Search routes.
 /// The caller passes the selected Post itself; no sample data or repository copy.
-class PostDetailsScreen extends StatelessWidget {
+class PostDetailsScreen extends StatefulWidget {
   const PostDetailsScreen({
     super.key,
     required this.post,
     required this.repository,
+    this.user,
   });
   final Post post;
   final PostsRepository repository;
+  final UserProfile? user;
+
+  @override
+  State<PostDetailsScreen> createState() => _PostDetailsScreenState();
+}
+
+class _PostDetailsScreenState extends State<PostDetailsScreen> {
+  Post get post => widget.post;
+  PostsRepository get repository => widget.repository;
+  UserProfile? get user => widget.user;
+  bool _submitting = false;
 
   String _date(DateTime date) {
     const months = [
@@ -34,16 +50,43 @@ class PostDetailsScreen extends StatelessWidget {
   String _time(DateTime date) =>
       '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
-  void _apply(BuildContext context) {
-    // No application, match or conversation is created. Replace at integration
-    // time with the approved application flow, never direct messaging.
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Başvuru işlemi henüz kullanıma hazır değil.'),
+  Future<void> _apply(BuildContext context) async {
+    if (_submitting) return;
+    final source = repository.applicationsRepository;
+    if (user == null || source == null) {
+      _message('Başvuru işlemi henüz kullanıma hazır değil.');
+      return;
+    }
+    final current = repository.posts.where((item) => item.id == post.id);
+    if (current.isEmpty ||
+        !source.canApply(current.first, applicantId: user!.postsOwnerId)) {
+      return;
+    }
+    setState(() => _submitting = true);
+    try {
+      await source.create(
+        postId: post.id,
+        applicantId: user!.postsOwnerId,
+        applicant: ApplicationPerson(
+          id: user!.postsOwnerId,
+          firstName: user!.firstName,
         ),
       );
+      if (!mounted) return;
+      _message('Başvurun kaydedildi.');
+    } on ApplicationFailure catch (error) {
+      if (mounted) _message(error.message);
+    } catch (_) {
+      if (mounted) _message('Başvuru gönderilemedi. Lütfen tekrar deneyin.');
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  void _message(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget _information(
@@ -121,7 +164,34 @@ class PostDetailsScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([
+      repository,
+      repository.applicationsRepository,
+    ]),
+    builder: (context, _) {
+      final current = repository.posts.where((item) => item.id == post.id);
+      if (current.isEmpty) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('İlan Detayları')),
+          body: const Center(child: Text('Bu ilan artık mevcut değil.')),
+        );
+      }
+      return _buildPost(context, current.first);
+    },
+  );
+
+  Widget _buildPost(BuildContext context, Post post) {
+    final source = repository.applicationsRepository;
+    final canApply =
+        user != null &&
+        (source?.canApply(post, applicantId: user!.postsOwnerId) ?? false);
+    final alreadyApplied =
+        user != null &&
+        (source
+                ?.forApplicant(user!.postsOwnerId)
+                .any((item) => item.postId == post.id) ??
+            false);
     final colors = Theme.of(context).colorScheme;
     final hasDescription = post.description?.trim().isNotEmpty ?? false;
     final hasDepartment = post.department?.trim().isNotEmpty ?? false;
@@ -146,20 +216,32 @@ class PostDetailsScreen extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: SafeArea(
-          top: false,
-          minimum: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          child: FilledButton(
-            key: const ValueKey('apply-post'),
-            onPressed: () => _apply(context),
-            child: const Text('Başvur'),
-          ),
-        ),
-      ),
+      bottomNavigationBar:
+          !canApply
+              ? null
+              : Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewInsetsOf(context).bottom,
+                ),
+                child: SafeArea(
+                  top: false,
+                  minimum: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                  child: FilledButton(
+                    key: const ValueKey('apply-post'),
+                    onPressed:
+                        _submitting || alreadyApplied
+                            ? null
+                            : () => _apply(context),
+                    child: Text(
+                      _submitting
+                          ? 'Gönderiliyor…'
+                          : alreadyApplied
+                          ? 'Başvuruldu'
+                          : 'Başvur',
+                    ),
+                  ),
+                ),
+              ),
       body: SafeArea(
         top: false,
         bottom: false,
@@ -275,48 +357,10 @@ class PostDetailsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
+            PostOwnerCard(
               key: const ValueKey('detail-owner'),
-              padding: const EdgeInsets.all(14),
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: colors.onPrimary,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: colors.outlineVariant),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: colors.secondary.withValues(alpha: 0.12),
-                    child: Icon(Icons.person_outline, color: colors.primary),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          post.authorName,
-                          key: const ValueKey('detail-author'),
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: colors.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'İlan Sahibi',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: colors.primary.withValues(alpha: 0.85),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              post: post,
+              viewerId: user?.postsOwnerId,
             ),
             if (hasDescription)
               _section(

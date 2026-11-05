@@ -5,7 +5,7 @@ import 'package:studyco_mobile/app/theme/app_theme.dart';
 import 'package:studyco_mobile/core/data/departments.dart';
 import 'package:studyco_mobile/features/home/screens/home_screen.dart';
 import 'package:studyco_mobile/features/posts/data/in_memory_posts_repository.dart';
-import 'package:studyco_mobile/features/posts/data/sample_posts.dart';
+import 'support/discovery_fixtures.dart';
 import 'package:studyco_mobile/features/posts/data/department_courses.dart';
 import 'package:studyco_mobile/features/posts/models/post.dart';
 import 'package:studyco_mobile/features/posts/screens/post_details_screen.dart';
@@ -27,14 +27,17 @@ Post listing(
   String location = 'Colombia',
 }) => Post(
   id: 'post-$index',
+  authorId: 'fixture-owner-$index',
   title: title,
   department: department,
   topic: topic,
   description: description,
   authorName: 'Öğrenci $index',
   createdAt: createdAt ?? DateTime(2026, 10, index + 1),
-  startsAt: startsAt ?? DateTime(2026, 11, 2, 10),
-  endsAt: DateTime(2026, 11, 2, 11),
+  startsAt: startsAt ?? DateTime(DateTime.now().year + 1, 11, 2, 10),
+  endsAt: (startsAt ?? DateTime(DateTime.now().year + 1, 11, 2, 10)).add(
+    const Duration(hours: 1),
+  ),
   location: location,
   type: PostType.tutoring,
   subject: PostSubject.general,
@@ -55,7 +58,7 @@ void main() {
   test(
     'Sample departments use canonical names and contain their listed courses',
     () {
-      for (final post in samplePosts()) {
+      for (final post in activeSamplePosts()) {
         expect(post.department, isNotNull, reason: post.id);
         expect(Departments.values, contains(post.department), reason: post.id);
         expect(
@@ -72,7 +75,7 @@ void main() {
   test(
     'Sample department alone, course alone and their intersection return expected posts',
     () {
-      final posts = samplePosts();
+      final posts = activeSamplePosts();
       expect(
         const PostSearch(
           department: Departments.computerEngineering,
@@ -140,7 +143,9 @@ void main() {
   testWidgets(
     'Sample Algorithms appears with course, department and combined UI filters',
     (tester) async {
-      final repository = InMemoryPostsRepository(initialPosts: samplePosts());
+      final repository = InMemoryPostsRepository(
+        initialPosts: activeSamplePosts(),
+      );
       addTearDown(repository.dispose);
       await tester.pumpWidget(
         MaterialApp(

@@ -8,7 +8,7 @@ import 'package:studyco_mobile/core/data/departments.dart';
 import 'package:studyco_mobile/features/home/screens/home_screen.dart';
 import 'package:studyco_mobile/features/search/screens/search_screen.dart';
 import 'package:studyco_mobile/features/posts/data/in_memory_posts_repository.dart';
-import 'package:studyco_mobile/features/posts/data/sample_posts.dart';
+import 'support/discovery_fixtures.dart';
 import 'package:studyco_mobile/features/posts/models/post.dart';
 import 'package:studyco_mobile/features/posts/widgets/post_card.dart';
 import 'package:studyco_mobile/features/home/widgets/home_header.dart';
@@ -23,6 +23,7 @@ Post extraPost({
   String? department,
 }) => Post(
   id: id,
+  authorId: 'fixture-owner',
   department: department,
   topic: 'Ders konusu',
   title:
@@ -31,8 +32,8 @@ Post extraPost({
           : 'Yeni İlan',
   authorName: long ? 'Çok Uzun Adı ve Soyadı Olan Öğrenci' : 'Öğrenci',
   createdAt: createdAt ?? DateTime.utc(2026, 10, 29, 12),
-  startsAt: startsAt ?? DateTime(2026, 11, 3, 9, 5),
-  endsAt: (startsAt ?? DateTime(2026, 11, 3, 9, 5)).add(
+  startsAt: startsAt ?? DateTime(DateTime.now().year + 1, 11, 3, 9, 5),
+  endsAt: (startsAt ?? DateTime(DateTime.now().year + 1, 11, 3, 9, 5)).add(
     const Duration(hours: 1),
   ),
   location:
@@ -45,7 +46,7 @@ Post extraPost({
 );
 
 class ControlledPostsRepository extends InMemoryPostsRepository {
-  ControlledPostsRepository() : super(initialPosts: samplePosts());
+  ControlledPostsRepository() : super(initialPosts: activeSamplePosts());
   final refreshes = <Completer<void>>[];
 
   @override
@@ -59,7 +60,8 @@ class ControlledPostsRepository extends InMemoryPostsRepository {
 void main() {
   late InMemoryPostsRepository repository;
   setUp(
-    () => repository = InMemoryPostsRepository(initialPosts: samplePosts()),
+    () =>
+        repository = InMemoryPostsRepository(initialPosts: activeSamplePosts()),
   );
   tearDown(() => repository.dispose());
 
@@ -245,7 +247,7 @@ void main() {
         extraPost(
           id: 'post-$day',
           createdAt: DateTime.utc(2026, 10, day),
-          startsAt: DateTime(2026, 12, 10 - day),
+          startsAt: DateTime(DateTime.now().year + 1, 12, 10 - day),
         ),
     ];
     repository = InMemoryPostsRepository(initialPosts: initial);
@@ -399,7 +401,7 @@ void main() {
     expect(notifications, 1);
     expect(() => repository.posts.clear(), throwsUnsupportedError);
     await expectLater(repository.addPost(extraPost()), throwsArgumentError);
-    final fresh = InMemoryPostsRepository(initialPosts: samplePosts());
+    final fresh = InMemoryPostsRepository(initialPosts: activeSamplePosts());
     fresh.dispose();
   });
 

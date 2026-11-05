@@ -11,9 +11,9 @@
 
 Ayrıntılar: ../../../docs/home.md
 
-İlan Detayları, HomePreview içindeki mevcut HomeScreen.onOpenPost callback'iyle açılır. Arama ileride aynı `PostDetailsScreen(post: selectedPost, repository: sharedRepository)` rotasını kullanabilir. Detay ekranı repository oluşturmaz; ilan bilgilerini değiştirmez. İlk sürümde favoriler desteklenmez; kaydet kontrolleri ve geçici favori durumu kaldırılmıştır. Boş açıklama, bölüm ve eski kayıtlardaki boş konu gösterilmez. Modelde ilan sahibinin profil kaydı veya güvenilir kullanıcı/yazar kimliği yoktur; ad karşılaştırmasıyla sahiplik kontrolü yapılmaz.
+İlan Detayları, HomePreview içindeki mevcut HomeScreen.onOpenPost callback'iyle açılır. Arama ileride aynı `PostDetailsScreen(post: selectedPost, repository: sharedRepository)` rotasını kullanabilir. Detay ekranı repository oluşturmaz; ilan bilgilerini değiştirmez. İlk sürümde favoriler desteklenmez; kaydet kontrolleri ve geçici favori durumu kaldırılmıştır. Boş açıklama, bölüm ve eski kayıtlardaki boş konu gösterilmez. İlanlarım akışı UserProfile.id / Post.authorId üzerinden sahipliği kontrol eder; gerçek kimlik yokken oturum kimliği kullanılır. Ad karşılaştırması yapılmaz. Ayrıntılar: [İlanlarım entegrasyonu](MY_POSTS_INTEGRATION.md).
 
-Başvur düğmesi şimdilik yalnızca işlemin hazır olmadığını bildirir. Başvuru/kabul/ret/eşleşme/sohbet durumu oluşturulmaz. Gerçek entegrasyonda başvuru ilan sahibinin Gelen Başvurular alanına gitmeli; yalnızca kabulden sonra tek bir ortak sohbet açılmalı. Bekleyen/reddedilen başvuru mesajlaşma yetkisi vermez. Kabul sonrası Mesaj Gönder mevcut sohbeti açmalı, ikinci sohbet oluşturmamalıdır. Sahiplik ve erişim denetimleri güvenilir kimliklerle gerçek entegrasyonda yapılmalıdır.
+Başvur düğmesi aynı PostsRepository.applicationsRepository kaynağını kullanır. Bellek kaynağında başvurular oturumluk oluşturulur ve Profilim → Başvurularım ekranında görünür. Kendi ilanına, süresi dolan ilana ve yinelenen başvuruya izin verilmez; kimliği bilinmeyen eski ilan sahipleri adla eşleştirilmez. API adaptörü yoksa sunucu başarısı gösterilmez. Durumlar, mock iptal ve ileride mesajlaşma erişimi için [Başvurularım entegrasyon notuna](../applications/APPLICATIONS_INTEGRATION.md) bakın.
 
 ## Tek konum kaynağı
 

@@ -13,7 +13,7 @@ import 'package:studyco_mobile/features/posts/data/campus_locations.dart';
 import 'package:studyco_mobile/features/home/screens/home_screen.dart';
 import 'package:studyco_mobile/features/home/widgets/home_bottom_navigation.dart';
 import 'package:studyco_mobile/features/posts/data/in_memory_posts_repository.dart';
-import 'package:studyco_mobile/features/posts/data/sample_posts.dart';
+import 'support/discovery_fixtures.dart';
 import 'package:studyco_mobile/features/posts/models/post.dart';
 import 'package:studyco_mobile/features/posts/screens/create_post_screen.dart';
 import 'package:studyco_mobile/features/posts/validation/create_post_validators.dart';
@@ -178,7 +178,7 @@ void main() {
   test(
     'Existing topic data remains available alongside optional descriptions',
     () {
-      final legacy = samplePosts().first;
+      final legacy = activeSamplePosts().first;
       expect(legacy.topic, 'Python Programlama');
       expect(legacy.description, isNull);
     },
@@ -506,12 +506,13 @@ void main() {
     testWidgets(
       'Shared Home repository shows ${entry.key}, keeps the newest six and all older posts',
       (tester) async {
-        final initial = samplePosts();
+        final initial = activeSamplePosts();
         final repository = InMemoryPostsRepository(
           initialPosts: [
             ...initial,
             for (var index = 0; index < 4; index++)
               Post(
+                authorId: 'fixture-owner',
                 id: 'old-$index',
                 title: 'Older',
                 topic: 'Old topic',

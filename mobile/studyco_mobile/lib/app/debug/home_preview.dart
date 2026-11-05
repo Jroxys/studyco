@@ -10,22 +10,33 @@ import 'home_preview_data.dart';
 /// Composition root for demo data; no auth session is created.
 abstract final class HomePreview {
   static const enabled = bool.fromEnvironment('HOME_PREVIEW');
-  static Widget? screen() =>
-      kDebugMode && enabled ? const _HomePreviewHost() : null;
+  static Widget? screen({InMemoryPostsRepository? repository}) =>
+      kDebugMode && enabled ? _HomePreviewHost(repository: repository) : null;
+  static InMemoryPostsRepository createRepository() {
+    final ownPost = previewIncomingPost();
+    return InMemoryPostsRepository(
+      initialPosts: [previewApplicationPost(), ownPost, ...samplePosts()],
+      initialApplications: [
+        ...previewIncomingApplications(ownPost),
+        ...previewCompletedApplications(),
+      ],
+    );
+  }
 }
 
 class _HomePreviewHost extends StatefulWidget {
-  const _HomePreviewHost();
+  const _HomePreviewHost({this.repository});
+  final InMemoryPostsRepository? repository;
   @override
   State<_HomePreviewHost> createState() => _HomePreviewHostState();
 }
 
 class _HomePreviewHostState extends State<_HomePreviewHost> {
-  late final _repository = InMemoryPostsRepository(initialPosts: samplePosts());
+  late final _repository = widget.repository ?? HomePreview.createRepository();
 
   @override
   void dispose() {
-    _repository.dispose();
+    if (widget.repository == null) _repository.dispose();
     super.dispose();
   }
 
@@ -38,7 +49,11 @@ class _HomePreviewHostState extends State<_HomePreviewHost> {
         (post) => Navigator.of(context).push<void>(
           MaterialPageRoute<void>(
             builder:
-                (_) => PostDetailsScreen(post: post, repository: _repository),
+                (_) => PostDetailsScreen(
+                  post: post,
+                  repository: _repository,
+                  user: sampleHomeUser,
+                ),
           ),
         ),
     onCreatePost:

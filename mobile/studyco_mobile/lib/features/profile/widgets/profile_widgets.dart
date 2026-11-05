@@ -143,6 +143,7 @@ class ProfileStatCard extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.caption,
+    this.value = '—',
     this.actionLabel,
     this.onTap,
     this.extraPadding = 0,
@@ -153,6 +154,7 @@ class ProfileStatCard extends StatelessWidget {
   final double extraVerticalPadding;
   final IconData icon;
   final String caption;
+  final String value;
   final String? actionLabel;
   final VoidCallback? onTap;
   @override
@@ -218,7 +220,7 @@ class ProfileStatCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          '—',
+                          value,
                           style: TextStyle(
                             fontSize: 14,
                             height: 1.2,

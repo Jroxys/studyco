@@ -231,7 +231,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: AnimatedBuilder(
         animation: widget.repository,
         builder: (context, _) {
-          final posts = widget.repository.posts;
+          final posts = widget.repository.discoverablePosts;
           final catalog = LocationCatalogScope.of(context);
           final selectedLocation = catalog.findByName(_location)?.name;
           final academic = AcademicCatalogScope.of(context);
@@ -432,6 +432,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               builder:
                                   (_) => PostDetailsScreen(
                                     post: post,
+                                    user: widget.user,
                                     repository: widget.repository,
                                   ),
                             ),

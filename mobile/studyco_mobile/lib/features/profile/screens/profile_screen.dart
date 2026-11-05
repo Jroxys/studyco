@@ -1,21 +1,179 @@
 import 'package:flutter/material.dart';
 import '../../home/widgets/home_bottom_navigation.dart';
 import '../models/profile_destination.dart';
+import '../../posts/domain/posts_repository.dart';
+import 'my_posts_screen.dart';
+import '../../applications/screens/applications_screen.dart';
+import '../../search/screens/search_screen.dart';
 import '../models/user_profile.dart';
 import '../widgets/profile_widgets.dart';
+import '../../reviews/domain/reviews_repository.dart';
+import '../../reviews/models/review.dart';
+import '../../reviews/widgets/reviews_repository_scope.dart';
+import '../../reviews/screens/reviews_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
     super.key,
     required this.user,
     required this.onDestination,
     this.onOpenSection,
+    this.repository,
+    this.reviewsRepository,
   });
   final UserProfile user;
+  final PostsRepository? repository;
+  final ReviewsRepository? reviewsRepository;
   final ValueChanged<int> onDestination;
   final ValueChanged<ProfileDestination>? onOpenSection;
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  UserProfile get user => widget.user;
+  PostsRepository? get repository => widget.repository;
+  ValueChanged<int> get onDestination => widget.onDestination;
+  ValueChanged<ProfileDestination>? get onOpenSection => widget.onOpenSection;
+  ReviewsRepository? _reviewsSource;
+  String? _reviewUserId;
+  ReviewStatistics? _rating;
+  bool _ratingLoading = false;
+  bool _ratingError = false;
+  bool _ratingConfigured = false;
+  int _ratingGeneration = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _configureRating();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfileScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _configureRating();
+  }
+
+  void _configureRating() {
+    final source =
+        widget.reviewsRepository ?? ReviewsRepositoryScope.maybeOf(context);
+    final userId = source?.isLocal == true ? user.postsOwnerId : user.id;
+    if (_ratingConfigured &&
+        identical(source, _reviewsSource) &&
+        userId == _reviewUserId) {
+      return;
+    }
+    _ratingConfigured = true;
+    _reviewsSource?.removeListener(_loadRating);
+    _reviewsSource = source;
+    _reviewsSource?.addListener(_loadRating);
+    _reviewUserId = userId;
+    _rating = null;
+    _loadRating();
+  }
+
+  Future<void> _loadRating() async {
+    final generation = ++_ratingGeneration;
+    final source = _reviewsSource;
+    final userId = _reviewUserId;
+    setState(() {
+      _ratingLoading = true;
+      _ratingError = false;
+      _rating = null;
+    });
+    try {
+      if (source == null || userId == null || userId.trim().isEmpty) {
+        throw const ReviewsFailure('Puan bilgisi alınamadı.');
+      }
+      final summary = await source.fetchSummaryForUser(userId);
+      if (!mounted || generation != _ratingGeneration) return;
+      _rating = summary;
+    } catch (_) {
+      if (!mounted || generation != _ratingGeneration) return;
+      _ratingError = true;
+    } finally {
+      if (mounted && generation == _ratingGeneration) {
+        setState(() => _ratingLoading = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _reviewsSource?.removeListener(_loadRating);
+    super.dispose();
+  }
+
+  String get _ratingCaption {
+    if (_ratingLoading) return 'Puan yükleniyor…';
+    if (_ratingError) return 'Puan bilgisi alınamadı.';
+    if (_rating == null) return 'Genel puan bekleniyor.';
+    if (_rating!.count == 0) return 'Henüz değerlendirme yok';
+    return 'Değerlendirme sayısı: ${_rating!.count}';
+  }
+
   void _open(BuildContext context, ProfileDestination destination) {
+    if (destination == ProfileDestination.posts && repository != null) {
+      Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => MyPostsScreen(repository: repository!, user: user),
+        ),
+      );
+      return;
+    }
+    if ((destination == ProfileDestination.applications ||
+            destination == ProfileDestination.incomingApplications) &&
+        repository != null) {
+      Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder:
+              (_) => ApplicationsScreen(
+                incoming:
+                    destination == ProfileDestination.incomingApplications,
+                postsRepository: repository!,
+                repository: repository!.applicationsRepository,
+                user: user,
+                onBrowse:
+                    destination == ProfileDestination.incomingApplications
+                        ? null
+                        : () => Navigator.of(context).push<void>(
+                          MaterialPageRoute(
+                            builder:
+                                (_) => SearchScreen(
+                                  repository: repository!,
+                                  user: user,
+                                  onHome: () {
+                                    final navigator = Navigator.of(context);
+                                    navigator.pop();
+                                    navigator.pop();
+                                    onDestination(0);
+                                  },
+                                ),
+                          ),
+                        ),
+              ),
+        ),
+      );
+      return;
+    }
+    if (destination == ProfileDestination.reviews) {
+      Navigator.of(context)
+          .push<void>(
+            MaterialPageRoute(
+              builder:
+                  (_) => ReviewsScreen(
+                    userId: _reviewUserId,
+                    repository: _reviewsSource,
+                  ),
+            ),
+          )
+          .then((_) {
+            if (mounted) _loadRating();
+          });
+      return;
+    }
     if (onOpenSection != null) {
       onOpenSection!(destination);
       return;
@@ -122,7 +280,8 @@ class ProfileScreen extends StatelessWidget {
                       extraVerticalPadding: verticalPadding,
                       title: 'Değerlendirme Puanım',
                       icon: Icons.star_outline_rounded,
-                      caption: 'Değerlendirme sayısı: —',
+                      value: _rating?.average?.toStringAsFixed(1) ?? '—',
+                      caption: _ratingCaption,
                       onTap: () => _open(context, ProfileDestination.reviews),
                     ),
                     SizedBox(height: rowGap),

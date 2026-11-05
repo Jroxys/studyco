@@ -5,11 +5,12 @@ import 'package:studyco_mobile/app/theme/app_theme.dart';
 import 'package:studyco_mobile/features/home/screens/home_screen.dart';
 import 'package:studyco_mobile/features/home/widgets/home_bottom_navigation.dart';
 import 'package:studyco_mobile/features/posts/data/in_memory_posts_repository.dart';
-import 'package:studyco_mobile/features/posts/data/sample_posts.dart';
+import 'support/discovery_fixtures.dart';
 import 'package:studyco_mobile/features/posts/screens/create_post_screen.dart';
 import 'package:studyco_mobile/features/profile/models/profile_destination.dart';
 import 'package:studyco_mobile/features/profile/models/user_profile.dart';
 import 'package:studyco_mobile/features/profile/screens/profile_screen.dart';
+import 'package:studyco_mobile/features/reviews/screens/reviews_screen.dart';
 import 'package:studyco_mobile/features/profile/widgets/profile_widgets.dart';
 import 'package:studyco_mobile/features/search/screens/search_screen.dart';
 
@@ -101,7 +102,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.textContaining('Değerlendirme sayısı: —'), findsOneWidget);
+      expect(find.text('Puan bilgisi alınamadı.'), findsOneWidget);
       expect(
         find.textContaining('Bakiye bilgisi henüz mevcut değil.'),
         findsOneWidget,
@@ -158,7 +159,9 @@ void main() {
     'All unfinished sections inform the user and logout keeps the profile open',
     (tester) async {
       await openProfile(tester);
-      for (final destination in ProfileDestination.values) {
+      for (final destination in ProfileDestination.values.where(
+        (item) => item != ProfileDestination.reviews,
+      )) {
         ScaffoldMessenger.of(
           tester.element(find.byType(ProfileScreen)),
         ).hideCurrentSnackBar();
@@ -194,16 +197,19 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
   });
 
-  testWidgets('Rating card retains the unavailable reviews notification', (
+  testWidgets('Rating card opens received reviews and Back restores Profile', (
     tester,
   ) async {
     await openProfile(tester);
     await tester.tap(find.byKey(const ValueKey('profile-rating')));
     await tester.pumpAndSettle();
+    expect(find.byType(ReviewsScreen), findsOneWidget);
     expect(
-      find.text('Değerlendirmelerim: Bu bölüm henüz hazır değil.'),
+      find.text('Değerlendirmeler şu anda görüntülenemiyor.'),
       findsOneWidget,
     );
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     expect(find.byType(ProfileScreen), findsOneWidget);
   });
 
@@ -350,7 +356,9 @@ void main() {
   }
 
   Future<InMemoryPostsRepository> openHome(WidgetTester tester) async {
-    final repository = InMemoryPostsRepository(initialPosts: samplePosts());
+    final repository = InMemoryPostsRepository(
+      initialPosts: activeSamplePosts(),
+    );
     addTearDown(repository.dispose);
     await tester.pumpWidget(
       MaterialApp(

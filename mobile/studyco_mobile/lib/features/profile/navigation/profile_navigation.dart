@@ -20,6 +20,7 @@ abstract final class ProfileNavigation {
         builder:
             (_) => ProfileScreen(
               user: user,
+              repository: repository,
               onDestination: (index) {
                 if (index == sourceIndex) {
                   navigator.pop();
