@@ -201,6 +201,63 @@ void main() {
       expect(find.text('4.5 · 4 değerlendirme'), findsOneWidget);
     },
   );
+  testWidgets(
+    'HOME_PREVIEW confirms from both participant screens before review',
+    (tester) async {
+      if (!HomePreview.enabled || PasswordResetPreview.screen() != null) return;
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      Future<void> tap(Finder finder) async {
+        await tester.ensureVisible(finder);
+        await tester.pumpAndSettle();
+        await tester.tap(finder);
+        await tester.pumpAndSettle();
+      }
+
+      final item = find.byKey(
+        const ValueKey('application-mock-confirmable-lesson'),
+      );
+      final confirm = find.byKey(const ValueKey('confirm-lesson'));
+      final review = find.text('Değerlendir');
+      await tap(find.byKey(const ValueKey('home-nav-3')));
+      await tap(find.byKey(const ValueKey('profile-applications')));
+      await tap(item);
+      expect(review, findsNothing);
+      await tap(confirm);
+      await tap(find.text('Onayla'));
+      expect(
+        find.text('Ders Durumu: Karşı Tarafın Onayı Bekleniyor'),
+        findsOneWidget,
+      );
+      expect(confirm, findsNothing);
+      expect(review, findsNothing);
+      await tap(find.byTooltip('Kapat'));
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tap(find.byKey(const ValueKey('home-nav-0')));
+      await tap(find.text('Ders Onayı: Örnek İlan Sahibi'));
+      await tap(item);
+      expect(
+        find.text('Karşı taraf dersi tamamladığını onayladı.'),
+        findsOneWidget,
+      );
+      await tap(confirm);
+      await tap(find.text('Onayla'));
+      expect(find.text('Ders Durumu: Tamamlandı'), findsOneWidget);
+      expect(confirm, findsNothing);
+      await tap(find.byTooltip('Kapat'));
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tap(find.byKey(const ValueKey('home-nav-3')));
+      await tap(find.byKey(const ValueKey('profile-applications')));
+      await tap(item);
+      expect(review, findsOneWidget);
+      await tap(review);
+      expect(find.text('Gönder'), findsOneWidget);
+    },
+  );
+
   testWidgets('Home debug entry preserves auth priority and normal login', (
     tester,
   ) async {
@@ -268,7 +325,21 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('profile-applications')));
       await tester.pumpAndSettle();
       expect(find.byType(ApplicationsScreen), findsOneWidget);
-      expect(find.text(selected.title), findsOneWidget);
+      final title = find.text(selected.title);
+      if (title.evaluate().isEmpty) {
+        await tester.scrollUntilVisible(
+          title,
+          200,
+          scrollable:
+              find
+                  .descendant(
+                    of: find.byKey(const ValueKey('applications-scroll')),
+                    matching: find.byType(Scrollable),
+                  )
+                  .first,
+        );
+      }
+      expect(title, findsOneWidget);
       await tester.pageBack();
       await tester.pumpAndSettle();
       expect(find.byType(ProfileScreen), findsOneWidget);

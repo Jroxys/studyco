@@ -1,3 +1,5 @@
+import '../../core/data/academic_catalog.dart';
+import '../../core/data/departments.dart';
 import '../../features/profile/models/user_profile.dart';
 import '../../features/posts/models/post.dart';
 import '../../features/applications/models/application.dart';
@@ -8,12 +10,28 @@ const previewTeacherId = 'mock-preview-teacher';
 const sampleHomeUser = UserProfile(
   id: 'mock-preview-student',
   firstName: 'Rümeysa',
+  lastName: 'Örnek',
+  phone: '0500 000 00 00',
+  email: 'rumeysa@example.test',
+  departmentId: 'mock-department-computer-engineering',
   university: 'Sivas Cumhuriyet Ünv.',
-  department: 'Bilgisayar Müh.',
+  department: Departments.computerEngineering,
   campus: 'Cumhuriyet Kampüs',
   unreadMessages: 2,
-  unreadNotifications: 1,
 );
+
+/// Explicit IDs used only by the preview profile repository.
+AcademicCatalog previewProfileCatalog() => AcademicCatalog([
+  AcademicDepartment(
+    id: 'mock-department-computer-engineering',
+    name: Departments.computerEngineering,
+  ),
+  AcademicDepartment(
+    id: 'mock-department-software-engineering',
+    name: Departments.softwareEngineering,
+  ),
+  AcademicDepartment(id: 'mock-department-medicine', name: 'Tıp'),
+], isTemporary: true);
 
 /// Debug-only composition fixture. IDs are explicit local mock IDs, not names
 /// or authenticated server identities. Refreshed relative to the preview launch.
@@ -120,3 +138,59 @@ List<Application> previewCompletedApplications() => [
       agreedTokenAmount: 0,
     ),
 ];
+
+const previewCompletionTeacher = UserProfile(
+  id: previewTeacherId,
+  firstName: 'Deniz (örnek ilan sahibi)',
+  department: 'Bilgisayar Mühendisliği',
+  campus: 'Cumhuriyet Kampüs',
+);
+
+Application previewConfirmableApplication({DateTime? now}) {
+  final end = (now ?? DateTime.now()).toUtc().subtract(
+    const Duration(hours: 1),
+  );
+  const postId = 'mock-confirmable-post';
+  return Application(
+    id: 'mock-confirmable-lesson',
+    postId: postId,
+    applicantId: sampleHomeUser.postsOwnerId,
+    teacherId: previewCompletionTeacher.postsOwnerId,
+    applicant: ApplicationPerson(
+      id: sampleHomeUser.postsOwnerId,
+      firstName: sampleHomeUser.firstName,
+    ),
+    teacher: ApplicationPerson(
+      id: previewCompletionTeacher.postsOwnerId,
+      firstName: previewCompletionTeacher.firstName,
+    ),
+    status: ApplicationStatus.accepted,
+    completionStatus: LessonCompletionStatus.awaitingConfirmation.apiValue,
+    confirmationDeadlineAt: end.add(const Duration(hours: 24)),
+    listing: ApplicationListing(
+      id: postId,
+      topic: 'Ders Tamamlama (Örnek)',
+      startAt: end.subtract(const Duration(hours: 1)),
+      endAt: end,
+      tokenPrice: 0,
+    ),
+  );
+}
+
+Application previewRejectedApplication() {
+  const postId = 'mock-preview-rejected-lesson';
+  final start = DateTime.now().subtract(const Duration(days: 3));
+  return Application(
+    id: 'mock-preview-rejected-request',
+    postId: postId,
+    applicantId: sampleHomeUser.postsOwnerId,
+    teacherId: previewTeacherId,
+    status: ApplicationStatus.rejected,
+    listing: ApplicationListing(
+      id: postId,
+      topic: 'Veri Yapıları (Örnek)',
+      startAt: start,
+      endAt: start.add(const Duration(hours: 1)),
+    ),
+  );
+}

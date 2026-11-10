@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../features/applications/screens/applications_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/posts/data/in_memory_posts_repository.dart';
 import '../../features/posts/data/sample_posts.dart';
@@ -19,6 +20,8 @@ abstract final class HomePreview {
       initialApplications: [
         ...previewIncomingApplications(ownPost),
         ...previewCompletedApplications(),
+        previewConfirmableApplication(),
+        previewRejectedApplication(),
       ],
     );
   }
@@ -45,6 +48,21 @@ class _HomePreviewHostState extends State<_HomePreviewHost> {
     repository: _repository,
     user: sampleHomeUser,
     isPreview: true,
+    previewActions: TextButton(
+      onPressed:
+          () => Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder:
+                  (_) => ApplicationsScreen(
+                    postsRepository: _repository,
+                    repository: _repository.applicationsRepository,
+                    user: previewCompletionTeacher,
+                    incoming: true,
+                  ),
+            ),
+          ),
+      child: const Text('Ders Onayı: Örnek İlan Sahibi'),
+    ),
     onOpenPost:
         (post) => Navigator.of(context).push<void>(
           MaterialPageRoute<void>(

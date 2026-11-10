@@ -1,6 +1,7 @@
 import '../../posts/domain/posts_repository.dart';
 import '../../posts/models/post.dart';
 import '../domain/applications_repository.dart';
+import '../domain/lesson_confirmation.dart';
 import '../models/application.dart';
 
 /// Session-only mock. Does not claim any remote mutation or status contract.
@@ -8,7 +9,10 @@ class InMemoryApplicationsRepository extends ApplicationsRepository {
   InMemoryApplicationsRepository({
     required this.postsRepository,
     Iterable<Application> initialApplications = const [],
-  }) : _applications = List.of(initialApplications);
+    DateTime Function()? clock,
+  }) : _applications = List.of(initialApplications),
+       _clock = clock ?? DateTime.now;
+  final DateTime Function() _clock;
   final PostsRepository postsRepository;
   final List<Application> _applications;
   int _sequence = 0;
@@ -210,6 +214,17 @@ class InMemoryApplicationsRepository extends ApplicationsRepository {
             return item.copyWith(
               status: ApplicationStatus.accepted,
               respondedAt: now,
+              lessonCompletionStatus: LessonCompletionStatus.notStarted,
+              confirmationDeadlineAt: lesson.endsAt.add(
+                const Duration(hours: 24),
+              ),
+              listing: ApplicationListing(
+                id: lesson.id,
+                topic: lesson.topic,
+                startAt: lesson.startsAt,
+                endAt: lesson.endsAt,
+                tokenPrice: item.listing?.tokenPrice ?? item.agreedTokenAmount,
+              ),
             );
           }
           if (item.postId == current.postId && item.isPending) {
@@ -230,6 +245,59 @@ class InMemoryApplicationsRepository extends ApplicationsRepository {
       },
     );
     notifyListeners();
+  }
+
+  @override
+  Future<Application> confirmLesson(String id, {required String userId}) async {
+    final current = _current(id);
+    final participant = current?.participantFor(userId);
+    final postOwner = current == null ? null : _post(current.postId)?.authorId;
+    if (current == null ||
+        participant == null ||
+        (postOwner != null && postOwner != current.teacherId)) {
+      throw const ApplicationFailure('Bu ders için onay verme yetkin yok.');
+    }
+    if (current.status != ApplicationStatus.accepted ||
+        current.isLocallyCancelled) {
+      throw const ApplicationFailure(
+        'Yalnızca kabul edilen dersler onaylanabilir.',
+      );
+    }
+    if (current.lessonCompletionStatus == LessonCompletionStatus.manualReview) {
+      throw const ApplicationFailure('Bu ders inceleme bekliyor.');
+    }
+    // A retry of a recorded confirmation never updates timestamps or notifies.
+    if (current.completedAtBy(participant) != null) return current;
+
+    final now = _clock().toUtc();
+    final phase = LessonConfirmationPhase.forUser(
+      current,
+      userId: userId,
+      now: now,
+    );
+    final error = switch (phase) {
+      LessonConfirmationPhase.open => null,
+      LessonConfirmationPhase.lessonPending => 'Ders bitmeden onay veremezsin.',
+      LessonConfirmationPhase.expired => 'Dersin onay süresi doldu.',
+      LessonConfirmationPhase.completed => 'Bu ders zaten tamamlandı.',
+      _ => 'Dersin onay bilgileri doğrulanamadı.',
+    };
+    if (error != null) throw ApplicationFailure(error);
+
+    final student = participant == LessonParticipant.student;
+    final otherAt =
+        student ? current.teacherCompletedAt : current.studentCompletedAt;
+    final updated = current.copyWith(
+      studentCompletedAt: student ? now : null,
+      teacherCompletedAt: student ? null : now,
+      lessonCompletionStatus:
+          otherAt == null
+              ? LessonCompletionStatus.awaitingConfirmation
+              : LessonCompletionStatus.completed,
+    );
+    _applications[_applications.indexOf(current)] = updated;
+    notifyListeners();
+    return updated;
   }
 
   @override

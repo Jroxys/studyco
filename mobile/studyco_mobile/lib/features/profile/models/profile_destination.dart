@@ -6,7 +6,6 @@ enum ProfileDestination {
   incomingApplications('Gelen Başvurular'),
   reviews('Değerlendirmelerim'),
   settings('Ayarlar'),
-  support('Yardım ve Destek'),
   logout('Çıkış Yap');
 
   const ProfileDestination(this.label);

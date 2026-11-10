@@ -7,6 +7,10 @@ import '../../applications/screens/applications_screen.dart';
 import '../../search/screens/search_screen.dart';
 import '../models/user_profile.dart';
 import '../widgets/profile_widgets.dart';
+import '../widgets/profile_repository_scope.dart';
+import 'edit_profile_screen.dart';
+import '../../auth/widgets/session_logout_scope.dart';
+import '../../settings/screens/settings_screen.dart';
 import '../../reviews/domain/reviews_repository.dart';
 import '../../reviews/models/review.dart';
 import '../../reviews/widgets/reviews_repository_scope.dart';
@@ -32,7 +36,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  UserProfile get user => widget.user;
+  UserProfile get user =>
+      ProfileRepositoryScope.currentOf(context, widget.user);
   PostsRepository? get repository => widget.repository;
   ValueChanged<int> get onDestination => widget.onDestination;
   ValueChanged<ProfileDestination>? get onOpenSection => widget.onOpenSection;
@@ -115,6 +120,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _open(BuildContext context, ProfileDestination destination) {
+    if (onOpenSection == null) {
+      if (destination == ProfileDestination.settings) {
+        final current = user;
+        Navigator.of(context).push<void>(
+          MaterialPageRoute(builder: (_) => SettingsScreen(user: current)),
+        );
+        return;
+      }
+      if (destination == ProfileDestination.logout) {
+        SessionLogoutScope.confirm(
+          context,
+          endSession: SessionLogoutScope.forUser(context, user.id),
+        );
+        return;
+      }
+    }
+    if (destination == ProfileDestination.edit && onOpenSection == null) {
+      final source = ProfileRepositoryScope.forUser(context, widget.user);
+      Navigator.of(context)
+          .push<bool>(
+            MaterialPageRoute(
+              builder:
+                  (_) => EditProfileScreen(userId: user.id, repository: source),
+            ),
+          )
+          .then((saved) {
+            if (mounted && saved == true) {
+              ScaffoldMessenger.of(this.context).showSnackBar(
+                const SnackBar(content: Text('Profil bilgilerin güncellendi.')),
+              );
+            }
+          });
+      return;
+    }
     if (destination == ProfileDestination.posts && repository != null) {
       Navigator.of(context).push<void>(
         MaterialPageRoute(
@@ -322,10 +361,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           (
                             ProfileDestination.settings,
                             Icons.settings_outlined,
-                          ),
-                          (
-                            ProfileDestination.support,
-                            Icons.help_outline_rounded,
                           ),
                           (ProfileDestination.logout, Icons.logout_rounded),
                         ]) ...[

@@ -10,12 +10,14 @@ class HomeHeader extends StatelessWidget {
     required this.onNotifications,
     required this.onProfile,
     this.isPreview = false,
+    this.unreadNotifications = 0,
   });
   final UserProfile user;
   final VoidCallback onMessages;
   final VoidCallback onNotifications;
   final VoidCallback onProfile;
   final bool isPreview;
+  final int unreadNotifications;
 
   Widget _badge(
     BuildContext context,
@@ -131,7 +133,7 @@ class HomeHeader extends StatelessWidget {
                 context,
                 'Bildirimler',
                 Icons.notifications_outlined,
-                user.unreadNotifications,
+                unreadNotifications,
                 onNotifications,
               ),
             ],

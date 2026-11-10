@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/post.dart';
 import '../domain/posts_repository.dart';
 import '../../profile/models/user_profile.dart';
+import '../../profile/widgets/profile_repository_scope.dart';
 import '../../applications/domain/applications_repository.dart';
 import '../../applications/models/application.dart';
 import '../widgets/post_owner_card.dart';
@@ -26,7 +27,13 @@ class PostDetailsScreen extends StatefulWidget {
 class _PostDetailsScreenState extends State<PostDetailsScreen> {
   Post get post => widget.post;
   PostsRepository get repository => widget.repository;
-  UserProfile? get user => widget.user;
+  UserProfile? get user {
+    final fallback = widget.user;
+    return fallback == null
+        ? null
+        : ProfileRepositoryScope.currentOf(context, fallback);
+  }
+
   bool _submitting = false;
 
   String _date(DateTime date) {

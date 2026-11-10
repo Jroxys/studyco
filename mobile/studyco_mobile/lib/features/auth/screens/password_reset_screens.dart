@@ -69,15 +69,19 @@ class ForgotPasswordScreen extends StatefulWidget {
     super.key,
     this.repository = const UnavailablePasswordResetRepository(),
     this.preview = false,
+    this.initialEmail,
+    this.onReturn,
   });
   final PasswordResetRepository repository;
   final bool preview;
+  final String? initialEmail;
+  final VoidCallback? onReturn;
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState extends _ResetState<ForgotPasswordScreen> {
-  final _email = TextEditingController();
+  late final _email = TextEditingController(text: widget.initialEmail);
   @override
   void dispose() {
     _email.dispose();
@@ -107,6 +111,7 @@ class _ForgotPasswordScreenState extends _ResetState<ForgotPasswordScreen> {
     title: 'Şifremi Unuttum',
     balanceVertically: true,
     description: 'Şifreni yenilemek için e-posta adresini gir.',
+    onReturn: widget.onReturn,
     preview: kDebugMode && widget.preview,
     child: form([
       AuthLabeledField(

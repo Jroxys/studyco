@@ -497,17 +497,21 @@ void main() {
     'Unimplemented destinations show honest messages without crashing',
     (tester) async {
       await open(tester);
-      for (final tooltip in ['Mesajlar', 'Bildirimler']) {
-        await tester.ensureVisible(find.byTooltip(tooltip));
-        await tester.tap(find.byTooltip(tooltip));
-        await tester.pumpAndSettle();
-        expect(
-          find.text('$tooltip ekranı henüz kullanıma açık değil.'),
-          findsOneWidget,
-        );
-        await tester.pump(const Duration(seconds: 5));
-        await tester.pumpAndSettle();
-      }
+      final messages = find.byTooltip('Mesajlar');
+      await tester.ensureVisible(messages);
+      await tester.tap(messages);
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Mesajlar ekranı henüz kullanıma açık değil.'),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Bildirimler'));
+      await tester.pumpAndSettle();
+      expect(find.text('Henüz bildirimin yok.'), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
       for (final entry in {1: 'İlan Oluştur'}.entries) {
         await tester.tap(find.byKey(ValueKey('home-nav-${entry.key}')));
         await tester.pumpAndSettle();
@@ -597,7 +601,11 @@ void main() {
         final button = find.byTooltip(name);
         final icon = find.descendant(of: button, matching: find.byType(Icon));
         final badge = find.descendant(of: button, matching: find.byType(Badge));
-        expect(tester.getRect(icon).overlaps(tester.getRect(badge)), isFalse);
+        if (name == 'Bildirimler') {
+          expect(badge, findsNothing);
+        } else {
+          expect(tester.getRect(icon).overlaps(tester.getRect(badge)), isFalse);
+        }
       }
       final nav = find.byKey(const ValueKey('home-nav-0'));
       final originalNav = tester.getRect(nav);

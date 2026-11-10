@@ -1,9 +1,11 @@
+import 'dart:async';
 import '../../reviews/widgets/review_request_action.dart';
 import 'package:flutter/material.dart';
 import '../../posts/domain/posts_repository.dart';
 import '../../posts/models/post.dart';
 import '../../profile/models/user_profile.dart';
 import '../domain/applications_repository.dart';
+import '../domain/lesson_confirmation.dart';
 import '../models/application.dart';
 
 class ApplicationsScreen extends StatefulWidget {
@@ -14,12 +16,16 @@ class ApplicationsScreen extends StatefulWidget {
     required this.user,
     this.onBrowse,
     this.incoming = false,
+    this.initialApplicationId,
+    this.openAtCompletion = false,
   });
   final PostsRepository postsRepository;
   final ApplicationsRepository? repository;
   final UserProfile user;
   final VoidCallback? onBrowse;
   final bool incoming;
+  final String? initialApplicationId;
+  final bool openAtCompletion;
 
   @override
   State<ApplicationsScreen> createState() => _ApplicationsScreenState();
@@ -30,6 +36,9 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
   bool _loading = true;
   String? _error;
   final _responding = <String>{};
+  final _confirming = <String>{};
+  bool _initialTargetHandled = false;
+  bool _initialTargetMissing = false;
   @override
   void initState() {
     super.initState();
@@ -40,6 +49,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _initialTargetMissing = false;
     });
     try {
       if (widget.incoming) {
@@ -54,11 +64,33 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+    final id = widget.initialApplicationId;
+    if (!mounted || _error != null || id == null || _initialTargetHandled) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          ModalRoute.of(context)?.isCurrent != true ||
+          _initialTargetHandled) {
+        return;
+      }
+      final source = widget.repository;
+      final entries =
+          widget.incoming
+              ? source?.forOwner(widget.user.postsOwnerId)
+              : source?.forApplicant(widget.user.postsOwnerId);
+      if (entries?.any((item) => item.id == id) != true) {
+        setState(() => _initialTargetMissing = true);
+        return;
+      }
+      _initialTargetHandled = true;
+      _open(id, atCompletion: widget.openAtCompletion);
+    });
   }
 
-  void _open(Application application) {
+  void _open(String id, {bool atCompletion = false}) {
     final source = widget.repository;
-    if (source == null) return;
+    if (source == null || _confirming.contains(id)) return;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -70,11 +102,21 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
       ),
       builder:
           (_) => _ApplicationDetailsSheet(
-            applicationId: application.id,
+            applicationId: id,
+            atCompletion: atCompletion,
             incoming: widget.incoming,
             repository: source,
             postsRepository: widget.postsRepository,
             user: widget.user,
+            confirmLesson: (userId) async {
+              // The list outlives a sheet dismissed by a drag or barrier tap.
+              if (!_confirming.add(id)) return;
+              try {
+                await source.confirmLesson(id, userId: userId);
+              } finally {
+                _confirming.remove(id);
+              }
+            },
           ),
     );
   }
@@ -308,7 +350,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 key: ValueKey('application-${application.id}'),
-                onTap: () => _open(application),
+                onTap: () => _open(application.id),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -410,6 +452,14 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                         style: const TextStyle(height: 1.5),
                       ),
                     ),
+                    if (_initialTargetMissing)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: Semantics(
+                          liveRegion: true,
+                          child: const Text('Bildirimdeki başvuru bulunamadı.'),
+                        ),
+                      ),
                     _filters(),
                   ],
                 ),
@@ -607,15 +657,6 @@ class _PostInformation extends StatelessWidget {
             Icons.receipt_long_outlined,
             'Sonuçlandırma tarihi: ${date(application.settledAt!)}',
           ),
-        if (detailed &&
-            application.completionStatus != null &&
-            application.studentCompletedAt == null &&
-            application.teacherCompletedAt == null)
-          _row(
-            context,
-            Icons.info_outline,
-            'Ders onay bilgileri henüz doğrulanmadı.',
-          ),
       ],
     );
   }
@@ -750,22 +791,40 @@ class _ApplicationDecisionButtons extends StatelessWidget {
 class _ApplicationDetailsSheet extends StatefulWidget {
   const _ApplicationDetailsSheet({
     required this.applicationId,
+    required this.atCompletion,
     required this.incoming,
     required this.repository,
     required this.postsRepository,
     required this.user,
+    required this.confirmLesson,
   });
   final String applicationId;
+  final bool atCompletion;
   final bool incoming;
   final ApplicationsRepository repository;
   final PostsRepository postsRepository;
   final UserProfile user;
+  final Future<void> Function(String userId) confirmLesson;
   @override
   State<_ApplicationDetailsSheet> createState() =>
       _ApplicationDetailsSheetState();
 }
 
 class _ApplicationDetailsSheetState extends State<_ApplicationDetailsSheet> {
+  final _completionAnchor = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.atCompletion) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final section = _completionAnchor.currentContext;
+        if (section != null) Scrollable.ensureVisible(section, alignment: .12);
+      });
+    }
+  }
+
   bool _busy = false;
   String? _notice;
   Future<void> _respond(bool accept) async {
@@ -828,6 +887,69 @@ class _ApplicationDetailsSheetState extends State<_ApplicationDetailsSheet> {
       if (mounted) _message(error.message);
     } catch (_) {
       if (mounted) _message('Başvuru iptal edilemedi. Lütfen tekrar deneyin.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  String? get _completionUserId =>
+      widget.repository.isLocal ? widget.user.postsOwnerId : widget.user.id;
+
+  Future<void> _confirmLesson() async {
+    final userId = _completionUserId;
+    if (_busy || userId == null || userId.trim().isEmpty) return;
+    setState(() {
+      _busy = true;
+      _notice = null;
+    });
+    try {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              scrollable: true,
+              title: const Text('Dersi Tamamla'),
+              content: const Text(
+                'Bu dersin gerçekleştiğini ve tamamlandığını onaylıyor musun?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Vazgeç'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Onayla'),
+                ),
+              ],
+            ),
+      );
+      if (!mounted || confirmed != true) return;
+      await widget.confirmLesson(userId);
+    } on ApplicationFailure catch (error) {
+      if (mounted) _message(error.message);
+    } catch (_) {
+      if (mounted) _message('Ders onayı kaydedilemedi. Lütfen tekrar dene.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _refreshCompletion() async {
+    final userId = _completionUserId;
+    if (_busy || userId == null || userId.trim().isEmpty) return;
+    setState(() {
+      _busy = true;
+      _notice = null;
+    });
+    try {
+      if (widget.incoming) {
+        await widget.repository.refreshIncoming(ownerId: userId);
+      } else {
+        await widget.repository.refresh(applicantId: userId);
+      }
+    } catch (_) {
+      if (mounted) _message('Ders durumu yenilenemedi. Lütfen tekrar dene.');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -908,7 +1030,15 @@ class _ApplicationDetailsSheetState extends State<_ApplicationDetailsSheet> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          _StatusBadge(application: application),
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              const Text('Başvuru Durumu:'),
+                              _StatusBadge(application: application),
+                            ],
+                          ),
                           const SizedBox(height: 20),
                           Divider(
                             color: Theme.of(context).colorScheme.outlineVariant,
@@ -933,6 +1063,22 @@ class _ApplicationDetailsSheetState extends State<_ApplicationDetailsSheet> {
                                 ),
                               ),
                             ),
+                          if (application.status ==
+                                  ApplicationStatus.accepted &&
+                              !application.isLocallyCancelled) ...[
+                            _LessonCompletionCard(
+                              key: _completionAnchor,
+                              application: application,
+                              userId: _completionUserId,
+                              busy: _busy,
+                              onConfirm: _confirmLesson,
+                              onRefresh:
+                                  widget.repository.isLocal
+                                      ? null
+                                      : _refreshCompletion,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                           ReviewRequestAction(
                             application: application,
                             user: widget.user,
@@ -982,4 +1128,170 @@ class _ApplicationDetailsSheetState extends State<_ApplicationDetailsSheet> {
       ),
     ),
   );
+}
+
+class _LessonCompletionCard extends StatefulWidget {
+  const _LessonCompletionCard({
+    super.key,
+    required this.application,
+    required this.userId,
+    required this.busy,
+    required this.onConfirm,
+    required this.onRefresh,
+  });
+
+  final Application application;
+  final String? userId;
+  final bool busy;
+  final VoidCallback onConfirm;
+  final VoidCallback? onRefresh;
+
+  @override
+  State<_LessonCompletionCard> createState() => _LessonCompletionCardState();
+}
+
+class _LessonCompletionCardState extends State<_LessonCompletionCard> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleUpdate();
+  }
+
+  @override
+  void didUpdateWidget(covariant _LessonCompletionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.application != widget.application ||
+        oldWidget.userId != widget.userId) {
+      _scheduleUpdate();
+    }
+  }
+
+  LessonConfirmationPhase _phase(DateTime now) =>
+      LessonConfirmationPhase.forUser(
+        widget.application,
+        userId: widget.userId ?? '',
+        now: now,
+      );
+
+  void _scheduleUpdate() {
+    _timer?.cancel();
+    final now = DateTime.now();
+    final phase = _phase(now);
+    final next = switch (phase) {
+      LessonConfirmationPhase.lessonPending =>
+        widget.application.listing?.endAt,
+      LessonConfirmationPhase.open || LessonConfirmationPhase.waitingForOther =>
+        LessonConfirmationPhase.closesAt(widget.application),
+      _ => null,
+    };
+    if (next != null) {
+      // This only updates the visible window. It does not settle the lesson.
+      _timer = Timer(next.difference(now), () {
+        if (!mounted) return;
+        setState(() {});
+        _scheduleUpdate();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final phase = _phase(DateTime.now());
+    final application = widget.application;
+    final participant = application.participantFor(widget.userId ?? '');
+    final otherConfirmed = switch (participant) {
+      LessonParticipant.student => application.teacherCompletedAt != null,
+      LessonParticipant.teacher => application.studentCompletedAt != null,
+      null => false,
+    };
+    final (label, description) = switch (phase) {
+      LessonConfirmationPhase.lessonPending => (
+        'Ders Bekleniyor',
+        'Ders tamamlandıktan sonra onay verebilirsin.',
+      ),
+      LessonConfirmationPhase.open => (
+        'Onay Bekleniyor',
+        otherConfirmed ? 'Karşı taraf dersi tamamladığını onayladı.' : null,
+      ),
+      LessonConfirmationPhase.waitingForOther => (
+        'Karşı Tarafın Onayı Bekleniyor',
+        'Dersi tamamladığını onayladın. Diğer öğrencinin onayı bekleniyor.',
+      ),
+      LessonConfirmationPhase.expired => (
+        'Onay Süresi Doldu',
+        'Yeni onay verilemez. Dersin güncel durumu bekleniyor.',
+      ),
+      LessonConfirmationPhase.completed => (
+        'Tamamlandı',
+        'Ders tamamlandı. Artık değerlendirme yapabilirsin.',
+      ),
+      LessonConfirmationPhase.manualReview => ('İnceleme Bekleniyor', null),
+      LessonConfirmationPhase.unavailable => (
+        'Ders Bilgisi Eksik',
+        'Dersin onay bilgileri şu anda doğrulanamıyor.',
+      ),
+    };
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.onPrimary,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.task_alt, color: colors.secondary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Ders Durumu: $label',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (description != null) ...[
+            const SizedBox(height: 8),
+            Text(description),
+          ],
+          if (phase == LessonConfirmationPhase.open) ...[
+            const SizedBox(height: 12),
+            FilledButton(
+              key: const ValueKey('confirm-lesson'),
+              onPressed: widget.busy ? null : widget.onConfirm,
+              child: Text(
+                widget.busy ? 'İşlem sürüyor…' : 'Dersi Tamamladım',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+          if (widget.onRefresh != null &&
+              phase != LessonConfirmationPhase.completed)
+            TextButton(
+              onPressed: widget.busy ? null : widget.onRefresh,
+              child: const Text(
+                'Ders Durumunu Yenile',
+                textAlign: TextAlign.center,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }

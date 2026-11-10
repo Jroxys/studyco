@@ -5,6 +5,7 @@ import '../data/department_courses.dart';
 import '../widgets/location_catalog_scope.dart';
 import '../../home/widgets/home_bottom_navigation.dart';
 import '../../profile/models/user_profile.dart';
+import '../../profile/widgets/profile_repository_scope.dart';
 import '../../profile/navigation/profile_navigation.dart';
 import '../domain/posts_repository.dart';
 import '../models/post.dart';
@@ -30,6 +31,9 @@ class CreatePostScreen extends StatefulWidget {
 }
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
+  UserProfile get _user =>
+      ProfileRepositoryScope.currentOf(context, widget.user);
+
   static int _sequence = 0;
   final _form = GlobalKey<FormState>();
   final _courseKey = GlobalKey<FormFieldState<DepartmentCourse>>();
@@ -173,7 +177,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       try {
         widget.repository.requireMutablePost(
           widget.initialPost!.id,
-          ownerId: widget.user.postsOwnerId,
+          ownerId: _user.postsOwnerId,
         );
       } on StateError {
         _message('Geçmiş veya kaldırılmış ilanlar düzenlenemez.');
@@ -203,7 +207,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       id: original?.id ?? id,
       status: original?.status ?? PostStatus.published,
       rawServerStatus: original?.rawServerStatus,
-      authorId: original?.authorId ?? widget.user.postsOwnerId,
+      authorId: original?.authorId ?? _user.postsOwnerId,
       applicationCount: original?.applicationCount,
       title:
           _editing || _course!.isOther
@@ -213,7 +217,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       topic: _topic.text.trim(),
       description:
           _description.text.trim().isEmpty ? null : _description.text.trim(),
-      authorName: original?.authorName ?? widget.user.firstName,
+      authorName: original?.authorName ?? _user.firstName,
       createdAt: createdAt,
       startsAt: _combine(_start)!,
       endsAt: _combine(_end)!,
@@ -228,10 +232,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         if (!widget.repository.supportsFullPostEditing) {
           throw UnsupportedError('Güncelleme desteklenmiyor.');
         }
-        await widget.repository.updatePost(
-          post,
-          ownerId: widget.user.postsOwnerId,
-        );
+        await widget.repository.updatePost(post, ownerId: _user.postsOwnerId);
       } else {
         await widget.repository.addPost(post);
       }
@@ -399,7 +400,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       return PostDetailsScreen(
         post: widget.initialPost!,
         repository: widget.repository,
-        user: widget.user,
+        user: _user,
       );
     }
     final catalog = LocationCatalogScope.of(context);
@@ -520,7 +521,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                             builder:
                                 (_) => SearchScreen(
                                   repository: widget.repository,
-                                  user: widget.user,
+                                  user: _user,
                                   onHome: () {
                                     navigator.pop();
                                     if (widget.onHome != null) {
@@ -536,7 +537,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       }
                       ProfileNavigation.open(
                         context,
-                        user: widget.user,
+                        user: _user,
                         repository: widget.repository,
                         sourceIndex: 1,
                         onHome:
@@ -616,7 +617,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.user.firstName,
+                                    _user.firstName,
                                     style: const TextStyle(
                                       fontSize: 21,
                                       fontWeight: FontWeight.w700,
@@ -634,7 +635,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                                     ),
                                   ),
                                   Text(
-                                    '${widget.user.university} • ${widget.user.department}',
+                                    '${_user.university} • ${_user.department}',
                                     style: TextStyle(
                                       color: colors.primary.withValues(
                                         alpha: 0.9,

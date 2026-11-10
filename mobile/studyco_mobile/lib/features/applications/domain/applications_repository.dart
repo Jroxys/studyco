@@ -41,6 +41,12 @@ abstract class ApplicationsRepository extends ChangeNotifier {
   Future<void> reject(String id, {required String ownerId}) =>
       Future.error(const ApplicationFailure('Başvuru reddedilemiyor.'));
 
+  /// Confirms only the authenticated participant. REST implementations send an
+  /// empty body, use the JWT for authorization and publish the returned snapshot
+  /// to the shared cache before completing. Failures must preserve that cache.
+  Future<Application> confirmLesson(String id, {required String userId}) =>
+      Future.error(const ApplicationFailure('Ders onayı şu anda yapılamıyor.'));
+
   Future<Application> create({
     required String postId,
     required String applicantId,

@@ -8,19 +8,22 @@ class ProfilePanel extends StatelessWidget {
     required this.child,
     this.onTap,
     this.tinted = false,
+    this.backgroundColor,
   });
   final Widget child;
   final VoidCallback? onTap;
   final bool tinted;
+  final Color? backgroundColor;
   @override
   Widget build(BuildContext context) => Material(
     color:
-        tinted
+        backgroundColor ??
+        (tinted
             ? Color.alphaBlend(
               Theme.of(context).colorScheme.secondary.withValues(alpha: .1),
               Theme.of(context).colorScheme.surface,
             )
-            : Theme.of(context).colorScheme.surface,
+            : Theme.of(context).colorScheme.surface),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
       side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
@@ -46,7 +49,7 @@ class ProfileIdentityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final initials =
-        user.firstName
+        user.fullName
             .trim()
             .split(RegExp(r'\s+'))
             .where((part) => part.isNotEmpty)
@@ -89,7 +92,7 @@ class ProfileIdentityCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user.firstName,
+                        user.fullName,
                         key: const ValueKey('profile-name'),
                         style: const TextStyle(
                           fontSize: 22,

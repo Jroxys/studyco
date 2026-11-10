@@ -24,12 +24,14 @@ class PasswordResetLayout extends StatelessWidget {
     required this.child,
     this.preview = false,
     this.balanceVertically = false,
+    this.onReturn,
   });
   final String title;
   final String description;
   final Widget child;
   final bool preview;
   final bool balanceVertically;
+  final VoidCallback? onReturn;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -78,10 +80,13 @@ class PasswordResetLayout extends StatelessWidget {
                   ),
                 TextButton(
                   onPressed:
+                      onReturn ??
                       () => Navigator.of(
                         context,
                       ).popUntil((route) => route.isFirst),
-                  child: const Text('Giriş Ekranına Dön'),
+                  child: Text(
+                    onReturn == null ? 'Giriş Ekranına Dön' : 'Ayarlara Dön',
+                  ),
                 ),
               ],
             );

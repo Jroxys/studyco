@@ -5,9 +5,13 @@ import '../../posts/models/post.dart';
 import '../../posts/widgets/post_card.dart';
 import '../../search/screens/search_screen.dart';
 import '../../profile/models/user_profile.dart';
+import '../../profile/widgets/profile_repository_scope.dart';
 import '../../profile/navigation/profile_navigation.dart';
 import '../widgets/home_bottom_navigation.dart';
 import '../widgets/home_header.dart';
+import '../../notifications/domain/notifications_repository.dart';
+import '../../notifications/screens/notifications_screen.dart';
+import '../../notifications/widgets/notifications_repository_scope.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -18,6 +22,7 @@ class HomeScreen extends StatefulWidget {
     this.onDestination,
     this.onCreatePost,
     this.isPreview = false,
+    this.previewActions,
   });
   final PostsRepository repository;
   final UserProfile user;
@@ -25,14 +30,63 @@ class HomeScreen extends StatefulWidget {
   final ValueChanged<String>? onDestination;
   final Future<bool?> Function()? onCreatePost;
   final bool isPreview;
+  final Widget? previewActions;
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  UserProfile get _user =>
+      ProfileRepositoryScope.currentOf(context, widget.user);
+
   bool _loading = true;
   String? _error;
   int _loadRequest = 0;
+  NotificationsRepository? _notifications;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _configureNotifications();
+  }
+
+  void _configureNotifications() {
+    final source = NotificationsRepositoryScope.forUser(
+      context,
+      widget.user.id,
+    );
+    if (identical(source, _notifications)) return;
+    _notifications = source;
+    if (source != null) _loadUnreadCount(source);
+  }
+
+  Future<void> _loadUnreadCount(NotificationsRepository source) async {
+    // Defer notifier changes until the current build finishes.
+    await Future<void>.value();
+    if (!mounted || !identical(source, _notifications)) return;
+    try {
+      await source.refresh();
+    } catch (_) {
+      // Keep the last confirmed badge. The list exposes an explicit retry.
+    }
+  }
+
+  void _openNotifications() {
+    final user = _user;
+    final source = _notifications;
+    final posts = widget.repository;
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder:
+            (_) => NotificationsScreen(
+              user: user,
+              repository: source,
+              postsRepository: posts,
+            ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void didUpdateWidget(covariant HomeScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.repository != widget.repository) _load();
+    if (oldWidget.user.id != widget.user.id) _configureNotifications();
   }
 
   Future<void> _load() async {
@@ -85,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (name == 'Profilim' && widget.onDestination == null) {
       ProfileNavigation.open(
         context,
-        user: widget.user,
+        user: _user,
         repository: widget.repository,
         sourceIndex: 0,
         onHome: () {},
@@ -96,10 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigator.of(context).push<void>(
         MaterialPageRoute(
           builder:
-              (_) => SearchScreen(
-                repository: widget.repository,
-                user: widget.user,
-              ),
+              (_) => SearchScreen(repository: widget.repository, user: _user),
         ),
       );
       return;
@@ -153,13 +205,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   slivers: [
                     SliverToBoxAdapter(
                       child: HomeHeader(
-                        user: widget.user,
+                        user: _user,
                         isPreview: widget.isPreview,
                         onMessages: () => _destination('Mesajlar'),
-                        onNotifications: () => _destination('Bildirimler'),
+                        unreadNotifications: _notifications?.unreadCount ?? 0,
+                        onNotifications: _openNotifications,
                         onProfile: () => _destination('Profilim'),
                       ),
                     ),
+                    if (widget.isPreview && widget.previewActions != null)
+                      SliverToBoxAdapter(child: widget.previewActions),
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
                       sliver: SliverToBoxAdapter(

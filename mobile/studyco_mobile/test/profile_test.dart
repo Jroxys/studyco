@@ -107,7 +107,8 @@ void main() {
         find.textContaining('Bakiye bilgisi henüz mevcut değil.'),
         findsOneWidget,
       );
-      expect(find.byType(ProfileActionTile), findsNWidgets(7));
+      expect(find.byType(ProfileActionTile), findsNWidgets(6));
+      expect(find.text('Yardım ve Destek'), findsNothing);
       expect(find.text('Kaydedilen İlanlar'), findsNothing);
       expect(find.byIcon(Icons.bookmark_border_rounded), findsNothing);
       expect(find.byTooltip('Profili Düzenle'), findsOneWidget);
@@ -155,36 +156,37 @@ void main() {
     },
   );
 
-  testWidgets(
-    'All unfinished sections inform the user and logout keeps the profile open',
-    (tester) async {
-      await openProfile(tester);
-      for (final destination in ProfileDestination.values.where(
-        (item) => item != ProfileDestination.reviews,
-      )) {
-        ScaffoldMessenger.of(
-          tester.element(find.byType(ProfileScreen)),
-        ).hideCurrentSnackBar();
-        await tester.pumpAndSettle();
-        final key =
-            destination == ProfileDestination.edit
-                ? 'profile-edit'
-                : destination == ProfileDestination.tokens
-                ? 'profile-tokens'
-                : 'profile-${destination.name}';
-        final target = find.byKey(ValueKey(key));
-        await tester.ensureVisible(target);
-        await tester.pumpAndSettle();
-        await tester.tap(target);
-        await tester.pumpAndSettle();
-        expect(
-          find.text('${destination.label}: Bu bölüm henüz hazır değil.'),
-          findsOneWidget,
-        );
-        expect(find.byType(ProfileScreen), findsOneWidget);
-      }
-    },
-  );
+  testWidgets('Unfinished sections inform the user and keep the profile open', (
+    tester,
+  ) async {
+    await openProfile(tester);
+    for (final destination in ProfileDestination.values.where(
+      (item) =>
+          item != ProfileDestination.reviews &&
+          item != ProfileDestination.edit &&
+          item != ProfileDestination.settings &&
+          item != ProfileDestination.logout,
+    )) {
+      ScaffoldMessenger.of(
+        tester.element(find.byType(ProfileScreen)),
+      ).hideCurrentSnackBar();
+      await tester.pumpAndSettle();
+      final key =
+          destination == ProfileDestination.tokens
+              ? 'profile-tokens'
+              : 'profile-${destination.name}';
+      final target = find.byKey(ValueKey(key));
+      await tester.ensureVisible(target);
+      await tester.pumpAndSettle();
+      await tester.tap(target);
+      await tester.pumpAndSettle();
+      expect(
+        find.text('${destination.label}: Bu bölüm henüz hazır değil.'),
+        findsOneWidget,
+      );
+      expect(find.byType(ProfileScreen), findsOneWidget);
+    }
+  });
 
   testWidgets('Typed section callback is reusable for future child routes', (
     tester,
@@ -293,7 +295,16 @@ void main() {
           expect(rect.width, previous.width);
         }
       }
-      for (final item in ['settings', 'support', 'logout']) {
+      final settings = tester.getRect(
+        find.byKey(const ValueKey('profile-settings')),
+      );
+      final logout = tester.getRect(
+        find.byKey(const ValueKey('profile-logout')),
+      );
+      expect(settings.width, closeTo(logout.width, .01));
+      expect(settings.top, logout.top);
+      expect(logout.left - settings.right, 8);
+      for (final item in ['settings', 'logout']) {
         expect(
           tester.getSize(find.byKey(ValueKey('profile-$item'))).height,
           greaterThanOrEqualTo(64),
@@ -305,7 +316,6 @@ void main() {
         'incomingApplications',
         'reviews',
         'settings',
-        'support',
         'logout',
       ]) {
         expect(

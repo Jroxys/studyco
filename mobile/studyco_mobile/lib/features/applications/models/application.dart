@@ -1,6 +1,27 @@
 /// Domain states, not serialized API enum values. Unknown server values stay unknown.
 enum ApplicationStatus { pending, accepted, rejected, autoCancelled, unknown }
 
+/// Separate from the request decision. Unknown API values fail closed.
+enum LessonCompletionStatus {
+  notStarted('NOT_STARTED'),
+  awaitingConfirmation('AWAITING_CONFIRMATION'),
+  completed('COMPLETED'),
+  manualReview('MANUAL_REVIEW');
+
+  const LessonCompletionStatus(this.apiValue);
+  final String apiValue;
+
+  static LessonCompletionStatus? fromApi(String? value) => switch (value) {
+    'NOT_STARTED' => notStarted,
+    'AWAITING_CONFIRMATION' => awaitingConfirmation,
+    'COMPLETED' => completed,
+    'MANUAL_REVIEW' => manualReview,
+    _ => null,
+  };
+}
+
+enum LessonParticipant { student, teacher }
+
 enum ApplicationFilter {
   all('Tümü'),
   pending('Beklemede'),
@@ -102,10 +123,32 @@ class Application {
   final DateTime? teacherCompletedAt;
   final DateTime? confirmationDeadlineAt;
   final DateTime? settledAt;
+  LessonCompletionStatus? get lessonCompletionStatus =>
+      LessonCompletionStatus.fromApi(completionStatus);
+
+  LessonParticipant? participantFor(String userId) {
+    final owner = teacherId;
+    if (owner == null ||
+        owner.trim().isEmpty ||
+        applicantId.trim().isEmpty ||
+        owner == applicantId) {
+      return null;
+    }
+    if (userId == applicantId) return LessonParticipant.student;
+    if (userId == owner) return LessonParticipant.teacher;
+    return null;
+  }
+
+  DateTime? completedAtBy(LessonParticipant participant) =>
+      switch (participant) {
+        LessonParticipant.student => studentCompletedAt,
+        LessonParticipant.teacher => teacherCompletedAt,
+      };
+
   bool get isCompletedLesson =>
       status == ApplicationStatus.accepted &&
       !isLocallyCancelled &&
-      completionStatus == 'COMPLETED';
+      lessonCompletionStatus == LessonCompletionStatus.completed;
 
   bool get isLocallyCancelled => locallyCancelledAt != null;
   bool get isPending =>
@@ -124,6 +167,11 @@ class Application {
     ApplicationStatus? status,
     DateTime? respondedAt,
     DateTime? locallyCancelledAt,
+    ApplicationListing? listing,
+    LessonCompletionStatus? lessonCompletionStatus,
+    DateTime? studentCompletedAt,
+    DateTime? teacherCompletedAt,
+    DateTime? confirmationDeadlineAt,
   }) => Application(
     id: id,
     postId: postId,
@@ -132,17 +180,18 @@ class Application {
     teacherId: teacherId,
     applicant: applicant,
     teacher: teacher,
-    listing: listing,
+    listing: listing ?? this.listing,
     agreedTokenAmount: agreedTokenAmount,
     createdAt: createdAt,
     respondedAt: respondedAt ?? this.respondedAt,
     rawServerStatus: rawServerStatus,
     locallyCancelledAt: locallyCancelledAt ?? this.locallyCancelledAt,
     conversationId: conversationId,
-    completionStatus: completionStatus,
-    studentCompletedAt: studentCompletedAt,
-    teacherCompletedAt: teacherCompletedAt,
-    confirmationDeadlineAt: confirmationDeadlineAt,
+    completionStatus: lessonCompletionStatus?.apiValue ?? completionStatus,
+    studentCompletedAt: studentCompletedAt ?? this.studentCompletedAt,
+    teacherCompletedAt: teacherCompletedAt ?? this.teacherCompletedAt,
+    confirmationDeadlineAt:
+        confirmationDeadlineAt ?? this.confirmationDeadlineAt,
     settledAt: settledAt,
   );
   Application cancelLocally(DateTime at) => copyWith(locallyCancelledAt: at);

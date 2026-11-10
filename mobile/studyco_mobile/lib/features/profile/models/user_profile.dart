@@ -4,14 +4,27 @@ class UserProfile {
   const UserProfile({
     required this.firstName,
     this.id,
+    this.lastName,
+    this.phone,
+    this.email,
+    this.departmentId,
     this.university = studyCoUniversityName,
     required this.department,
     required this.campus,
     this.unreadMessages = 0,
-    this.unreadNotifications = 0,
   });
   final String firstName;
   final String? id;
+  final String? lastName;
+  final String? phone;
+  final String? email;
+  final String? departmentId;
+  String get fullName => [firstName, lastName]
+      .whereType<String>()
+      .map((part) => part.trim())
+      .where((part) => part.isNotEmpty)
+      .join(' ');
+
   static final _sessionIds = Expando<String>();
   static int _sequence = 0;
 
@@ -24,5 +37,4 @@ class UserProfile {
   final String department;
   final String campus;
   final int unreadMessages;
-  final int unreadNotifications;
 }
