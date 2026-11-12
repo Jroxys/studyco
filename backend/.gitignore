@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.test
+.orchestra/logs/
+.npm-cache
+coverage
+.orchestra/reports/*-codex.md
+.orchestra/reports/*-agy.md
