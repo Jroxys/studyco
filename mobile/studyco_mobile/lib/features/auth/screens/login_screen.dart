@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/api/api_client.dart';
+import '../../../core/session/auth_session_scope.dart';
+import '../data/remote_password_reset_repository.dart';
 import 'register_screen.dart';
 import 'password_reset_screens.dart';
 
@@ -49,13 +52,20 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _submit() async {
     if (!mounted || _busy) return;
     if (!_formKey.currentState!.validate()) return;
+    final session = AuthSessionScope.maybeOf(context);
     setState(() => _busy = true);
     try {
-      // Keep the current synchronous fallback in the same guarded async flow.
-      await Future<void>.sync(() {
-        FocusScope.of(context).unfocus();
+      FocusScope.of(context).unfocus();
+      if (session == null) {
         _showMessage('Giriş şu anda kullanılamıyor.');
-      });
+        return;
+      }
+      // On success the app root replaces this screen with Home.
+      await session.login(_emailController.text, _passwordController.text);
+    } catch (error) {
+      if (mounted) {
+        _showMessage(apiErrorMessage(error, fallback: 'Giriş yapılamadı.'));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -285,9 +295,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   context,
                                                 ).push<void>(
                                                   MaterialPageRoute(
-                                                    builder:
-                                                        (_) =>
-                                                            const ForgotPasswordScreen(),
+                                                    builder: (_) {
+                                                      final session =
+                                                          AuthSessionScope.maybeOf(
+                                                            context,
+                                                          );
+                                                      return session == null
+                                                          ? const ForgotPasswordScreen()
+                                                          : ForgotPasswordScreen(
+                                                            repository:
+                                                                RemotePasswordResetRepository(
+                                                                  session.api,
+                                                                ),
+                                                          );
+                                                    },
                                                   ),
                                                 ),
                                             child: const Text(

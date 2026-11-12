@@ -220,85 +220,79 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'Registration checks consent and never reports account creation',
-    (tester) async {
-      await tester.pumpWidget(const MyApp());
-      await tester.ensureVisible(find.text('Kayıt Ol'));
-      await tester.tap(find.text('Kayıt Ol'));
-      await tester.pumpAndSettle();
-      final fields = find.byType(TextFormField);
-      final values = [
-        'Ayşe',
-        'Yılmaz',
-        'student@example.com',
-        '05551234567',
-        'secret123',
-        'secret123',
-      ];
-      for (var i = 0; i < values.length; i++) {
-        await tester.ensureVisible(fields.at(i));
-        await tester.enterText(fields.at(i), values[i]);
-      }
-      await tester.ensureVisible(find.text('GG/AA/YYYY'));
-      await tester.tap(find.text('GG/AA/YYYY'));
-      await tester.pumpAndSettle();
-      final picker = tester.widget<DatePickerDialog>(
-        find.byType(DatePickerDialog),
-      );
-      expect(
-        picker.lastDate.isAfter(DateUtils.dateOnly(DateTime.now())),
-        isFalse,
-      );
-      await tester.tap(find.text('Seç'));
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.byType(DropdownButtonFormField<String>));
-      await tester.tap(find.byType(DropdownButtonFormField<String>));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Bilgisayar Mühendisliği').last);
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.byTooltip('ŞİFRE: Şifreyi göster'));
-      await tester.tap(find.byTooltip('ŞİFRE: Şifreyi göster'));
-      await tester.pump();
-      expect(
-        tester.widget<TextField>(find.byType(TextField).at(4)).obscureText,
-        isFalse,
-      );
-      expect(
-        tester.widget<TextField>(find.byType(TextField).at(5)).obscureText,
-        isTrue,
-      );
-      await tester.ensureVisible(
-        find.byTooltip('ŞİFRE TEKRAR: Şifreyi göster'),
-      );
-      await tester.tap(find.byTooltip('ŞİFRE TEKRAR: Şifreyi göster'));
-      await tester.pump();
-      expect(
-        tester.widget<TextField>(find.byType(TextField).at(5)).obscureText,
-        isFalse,
-      );
-      await tester.ensureVisible(find.text('Kayıt Ol'));
-      await tester.tap(find.text('Kayıt Ol'));
-      await tester.pump();
-      expect(
-        find.text('Devam etmek için koşulları onaylayın.'),
-        findsOneWidget,
-      );
-      expect(find.byType(SnackBar), findsNothing);
-      await tester.ensureVisible(find.byType(CheckboxListTile));
-      await tester.tap(find.byType(CheckboxListTile));
-      await tester.pump();
-      await tester.ensureVisible(find.text('Kayıt Ol'));
-      await tester.tap(find.text('Kayıt Ol'));
-      await tester.pump();
-      expect(
-        find.text(
-          'Kayıt hizmeti henüz kullanıma açılmadı. Hesap oluşturulmadı.',
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Hesap Oluştur'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
+  testWidgets('Registration checks consent and never reports account creation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.ensureVisible(find.text('Kayıt Ol'));
+    await tester.tap(find.text('Kayıt Ol'));
+    await tester.pumpAndSettle();
+    final fields = find.byType(TextFormField);
+    final values = [
+      'Ayşe',
+      'Yılmaz',
+      'student@example.com',
+      '05551234567',
+      'secret123',
+      'secret123',
+    ];
+    for (var i = 0; i < values.length; i++) {
+      await tester.ensureVisible(fields.at(i));
+      await tester.enterText(fields.at(i), values[i]);
+    }
+    await tester.ensureVisible(find.text('GG/AA/YYYY'));
+    await tester.tap(find.text('GG/AA/YYYY'));
+    await tester.pumpAndSettle();
+    final picker = tester.widget<DatePickerDialog>(
+      find.byType(DatePickerDialog),
+    );
+    expect(
+      picker.lastDate.isAfter(DateUtils.dateOnly(DateTime.now())),
+      isFalse,
+    );
+    await tester.tap(find.text('Seç'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byType(DropdownButtonFormField<String>));
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bilgisayar Mühendisliği').last);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byTooltip('ŞİFRE: Şifreyi göster'));
+    await tester.tap(find.byTooltip('ŞİFRE: Şifreyi göster'));
+    await tester.pump();
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(4)).obscureText,
+      isFalse,
+    );
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(5)).obscureText,
+      isTrue,
+    );
+    await tester.ensureVisible(find.byTooltip('ŞİFRE TEKRAR: Şifreyi göster'));
+    await tester.tap(find.byTooltip('ŞİFRE TEKRAR: Şifreyi göster'));
+    await tester.pump();
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(5)).obscureText,
+      isFalse,
+    );
+    await tester.ensureVisible(find.text('Kayıt Ol'));
+    await tester.tap(find.text('Kayıt Ol'));
+    await tester.pump();
+    expect(find.text('Devam etmek için koşulları onaylayın.'), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
+    await tester.ensureVisible(find.byType(CheckboxListTile));
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Kayıt Ol'));
+    await tester.tap(find.text('Kayıt Ol'));
+    await tester.pump();
+    expect(
+      find.text(
+        'Bölüm listesi sunucudan alınamadı. Bağlantını kontrol edip tekrar dene.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Hesap Oluştur'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

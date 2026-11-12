@@ -20,7 +20,12 @@ import '../features/posts/domain/location_catalog.dart';
 import '../features/posts/widgets/location_catalog_scope.dart';
 import '../features/posts/data/campus_locations.dart';
 
+import '../core/data/remote_catalog.dart';
+import '../core/session/auth_session.dart';
+import '../core/session/auth_session_scope.dart';
 import '../features/auth/screens/login_screen.dart';
+import 'session/signed_in_home.dart';
+import 'session/signed_in_services.dart';
 import '../features/auth/widgets/session_logout_scope.dart';
 import 'theme/app_theme.dart';
 import 'debug/home_preview.dart';
@@ -34,12 +39,16 @@ class MyApp extends StatefulWidget {
     this.reviewsRepository,
     this.profileRepository,
     this.notificationsRepository,
+    this.session,
   });
   final LocationCatalog? locationCatalog;
   final AcademicCatalog? academicCatalog;
   final ReviewsRepository? reviewsRepository;
   final ProfileRepository? profileRepository;
   final NotificationsRepository? notificationsRepository;
+
+  /// Login state and API client. Created (with secure token storage) when null.
+  final AuthSession? session;
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -50,6 +59,9 @@ class _MyAppState extends State<MyApp> {
   InMemoryPostsRepository? _previewPosts;
   InMemoryNotificationsRepository? _previewNotifications;
   bool _previewEnded = false;
+  late final AuthSession _session = widget.session ?? AuthSession();
+  SignedInServices? _services;
+  AcademicCatalog? _registrationCatalog;
 
   Future<void> _endPreview() async {
     if (!mounted || _previewEnded || _previewPosts == null) return;
@@ -117,6 +129,53 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _configurePreview();
+    _session.addListener(_onSessionChanged);
+    if (_session.status == SessionStatus.restoring) _session.restore();
+    _syncServices();
+    if (widget.academicCatalog == null && _previewPosts == null) {
+      _loadRegistrationDepartments();
+    }
+  }
+
+  /// Registration needs real department IDs before an account exists.
+  Future<void> _loadRegistrationDepartments() async {
+    try {
+      final catalog = await RemoteCatalog(_session.api).departmentsOnly();
+      if (mounted && catalog.departments.isNotEmpty) {
+        setState(() => _registrationCatalog = catalog);
+      }
+    } catch (_) {
+      // Registration explains that the list is unavailable and allows retry.
+    }
+  }
+
+  void _onSessionChanged() {
+    _syncServices();
+    if (mounted) setState(() {});
+  }
+
+  /// One set of remote repositories per signed-in user; none when signed out.
+  void _syncServices() {
+    final user = _session.user;
+    final signedIn = _session.status == SessionStatus.signedIn && user != null;
+    final current = _services;
+    if (signedIn ? current?.userId == user.id : current == null) return;
+    current?.removeListener(_onServicesChanged);
+    current?.dispose();
+    _services = null;
+    if (signedIn) {
+      final next = SignedInServices(
+        _session,
+        initialAcademic: _registrationCatalog,
+      );
+      next.addListener(_onServicesChanged);
+      _services = next;
+      next.load();
+    }
+  }
+
+  void _onServicesChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -127,6 +186,10 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
+    _session.removeListener(_onSessionChanged);
+    _services?.removeListener(_onServicesChanged);
+    _services?.dispose();
+    if (widget.session == null) _session.dispose();
     _previewReviews?.dispose();
     _previewProfile?.dispose();
     _previewPosts?.dispose();
@@ -141,54 +204,78 @@ class _MyAppState extends State<MyApp> {
             ? null
             : PasswordResetPreview.screen() ??
                 HomePreview.screen(repository: _previewPosts);
-    return MaterialApp(
-      key: ValueKey(_previewEnded),
-      title: 'StudyCo',
-      builder:
-          (_, child) => LocationCatalogScope(
-            catalog: widget.locationCatalog ?? CampusLocations.catalog,
-            child: AcademicCatalogScope(
-              catalog: widget.academicCatalog ?? AcademicCatalog.temporary,
-              child: ReviewsRepositoryScope(
-                repository:
-                    _previewEnded
-                        ? null
-                        : widget.reviewsRepository ?? _previewReviews,
-                child: ProfileRepositoryScope(
+    final services = preview == null ? _services : null;
+    return AuthSessionScope(
+      notifier: _session,
+      child: MaterialApp(
+        key: ValueKey('$_previewEnded/${services?.userId}'),
+        title: 'StudyCo',
+        builder:
+            (_, child) => LocationCatalogScope(
+              catalog:
+                  widget.locationCatalog ??
+                  services?.locations ??
+                  CampusLocations.catalog,
+              child: AcademicCatalogScope(
+                catalog:
+                    widget.academicCatalog ??
+                    services?.academic ??
+                    _registrationCatalog ??
+                    AcademicCatalog.temporary,
+                child: ReviewsRepositoryScope(
                   repository:
-                      _previewEnded
+                      services?.reviews ??
+                      (_previewEnded
                           ? null
-                          : widget.profileRepository ?? _previewProfile,
-                  child: SessionLogoutScope(
-                    userId: _previewPosts == null ? null : sampleHomeUser.id,
-                    endSession: _endPreview,
-                    child: NotificationsRepositoryScope(
-                      repository:
-                          _previewEnded
-                              ? null
-                              : widget.notificationsRepository ??
-                                  _previewNotifications,
-                      child: child!,
+                          : widget.reviewsRepository ?? _previewReviews),
+                  child: ProfileRepositoryScope(
+                    repository:
+                        services?.profile ??
+                        (_previewEnded
+                            ? null
+                            : widget.profileRepository ?? _previewProfile),
+                    child: SessionLogoutScope(
+                      userId:
+                          services?.userId ??
+                          (_previewPosts == null ? null : sampleHomeUser.id),
+                      endSession:
+                          services != null ? _session.logout : _endPreview,
+                      child: NotificationsRepositoryScope(
+                        repository:
+                            services?.notifications ??
+                            (_previewEnded
+                                ? null
+                                : widget.notificationsRepository ??
+                                    _previewNotifications),
+                        child: child!,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      home: preview == null ? const LoginScreen() : null,
-      onGenerateRoute:
-          (_) => MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
-      onGenerateInitialRoutes:
-          preview == null
-              ? null
-              : (_) {
-                return [
-                  MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
-                  MaterialPageRoute<void>(builder: (_) => preview),
-                ];
-              },
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        home:
+            preview != null
+                ? null
+                : services != null
+                ? SignedInHome(services: services)
+                : const LoginScreen(),
+        onGenerateRoute:
+            (_) => MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+        onGenerateInitialRoutes:
+            preview == null
+                ? null
+                : (_) {
+                  return [
+                    MaterialPageRoute<void>(
+                      builder: (_) => const LoginScreen(),
+                    ),
+                    MaterialPageRoute<void>(builder: (_) => preview),
+                  ];
+                },
+      ),
     );
   }
 }

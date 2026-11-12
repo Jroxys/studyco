@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:studyco_mobile/app/app.dart';
-import 'package:studyco_mobile/features/home/screens/counter_screen.dart';
+
+import 'support/fake_backend.dart';
 
 void main() {
   testWidgets('Login is the initial screen and validates empty fields', (
     tester,
   ) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(session: FakeBackend().session));
 
     expect(find.text('Hoş geldin!'), findsOneWidget);
     expect(find.byType(Image), findsOneWidget);
@@ -20,7 +21,7 @@ void main() {
   });
 
   testWidgets('Email validation and password visibility work', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(session: FakeBackend().session));
     await tester.enterText(find.byType(TextFormField).first, 'invalid');
     await tester.enterText(find.byType(TextFormField).last, 'secret');
     await tester.pump();
@@ -51,7 +52,7 @@ void main() {
     await tester.tap(find.text('Giriş Yap'));
     await tester.pump();
     expect(find.text('Geçerli bir e-posta adresi girin.'), findsNothing);
-    expect(find.text('Giriş şu anda kullanılamıyor.'), findsOneWidget);
+    expect(find.text('E-posta veya şifre hatalı.'), findsOneWidget);
     expect(find.text('Hoş geldin!'), findsOneWidget);
   });
 
@@ -62,7 +63,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetViewInsets);
 
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(session: FakeBackend().session));
     tester.view.viewInsets = const FakeViewPadding(bottom: 280);
     await tester.pump();
     await tester.ensureVisible(find.text('Giriş Yap'));
@@ -76,7 +77,7 @@ void main() {
   testWidgets(
     'Login coalesces rapid button and Done submissions and permits retry',
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(session: FakeBackend().session));
       await tester.enterText(
         find.byType(TextFormField).first,
         'student@example.com',
@@ -86,9 +87,7 @@ void main() {
       final submit =
           tester.widget<FilledButton>(find.byType(FilledButton)).onPressed!;
       final done =
-          tester
-              .widget<TextField>(find.byType(TextField).last)
-              .onSubmitted!;
+          tester.widget<TextField>(find.byType(TextField).last).onSubmitted!;
 
       // Exercise stale callbacks before a rebuild can disable the button.
       submit();
@@ -96,7 +95,7 @@ void main() {
       submit();
       await tester.pumpAndSettle();
       expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.text('Giriş şu anda kullanılamıyor.'), findsOneWidget);
+      expect(find.text('E-posta veya şifre hatalı.'), findsOneWidget);
 
       // A duplicate submission would queue another notification.
       await tester.pump(const Duration(seconds: 5));
@@ -109,7 +108,7 @@ void main() {
 
       submit();
       await tester.pumpAndSettle();
-      expect(find.text('Giriş şu anda kullanılamıyor.'), findsOneWidget);
+      expect(find.text('E-posta veya şifre hatalı.'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
@@ -117,7 +116,7 @@ void main() {
   testWidgets('Login submission remains safe when its screen is removed', (
     tester,
   ) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(session: FakeBackend().session));
     await tester.enterText(
       find.byType(TextFormField).first,
       'student@example.com',
@@ -131,15 +130,5 @@ void main() {
     submit();
     await tester.pump();
     expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('Counter screen still increments', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: MyHomePage(title: 'Flutter Demo Home Page')),
-    );
-    expect(find.text('0'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-    expect(find.text('1'), findsOneWidget);
   });
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/data/academic_catalog.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/session/auth_session.dart';
+import '../../../core/session/auth_session_scope.dart';
 import '../../../core/widgets/academic_catalog_scope.dart';
 
 import '../validation/registration_validators.dart';
@@ -89,19 +92,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // No transport is connected yet. Do not persist or log the form snapshot.
-  Future<void> _submitRegistration(_RegistrationData _) =>
-      Future<void>.sync(() {
-        final messenger = ScaffoldMessenger.of(context);
-        messenger.hideCurrentSnackBar();
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Kayıt hizmeti henüz kullanıma açılmadı. Hesap oluşturulmadı.',
-            ),
+  /// Creates the account; on success the app root replaces this route with Home.
+  /// The form snapshot is never persisted or logged.
+  Future<void> _submitRegistration(_RegistrationData data) async {
+    final session = AuthSessionScope.maybeOf(context);
+    final departmentId = _academicCatalog?.findDepartment(data.department)?.id;
+    if (session == null || departmentId == null) {
+      _message(
+        session == null
+            ? 'Kayıt hizmeti henüz kullanıma açılmadı. Hesap oluşturulmadı.'
+            : 'Bölüm listesi sunucudan alınamadı. Bağlantını kontrol edip tekrar dene.',
+      );
+      return;
+    }
+    try {
+      await session.register(
+        RegistrationRequest(
+          firstName: data.firstName,
+          lastName: data.lastName,
+          birthDate: data.birthDate,
+          email: data.email,
+          phone: data.phone,
+          password: data.password,
+          departmentId: departmentId,
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        _message(
+          apiErrorMessage(
+            error,
+            fallback: 'Kayıt tamamlanamadı. Hesap oluşturulmadı.',
           ),
         );
-      });
+      }
+    }
+  }
+
+  void _message(String text) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(SnackBar(content: Text(text)));
+  }
 
   Future<void> _pickBirthDate(FormFieldState<DateTime> field) async {
     FocusScope.of(context).unfocus();
@@ -382,20 +414,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            CheckboxListTile(
-                                              contentPadding: EdgeInsets.zero,
-                                              controlAffinity:
-                                                  ListTileControlAffinity
-                                                      .leading,
-                                              activeColor: colors.secondary,
-                                              value: field.value ?? false,
-                                              onChanged:
-                                                  (value) => field.didChange(
-                                                    value ?? false,
+                                            // Own Material so ink is not hidden
+                                            // by the decorated card behind it.
+                                            Material(
+                                              type: MaterialType.transparency,
+                                              child: CheckboxListTile(
+                                                contentPadding: EdgeInsets.zero,
+                                                controlAffinity:
+                                                    ListTileControlAffinity
+                                                        .leading,
+                                                activeColor: colors.secondary,
+                                                value: field.value ?? false,
+                                                onChanged:
+                                                    (value) => field.didChange(
+                                                      value ?? false,
+                                                    ),
+                                                title: const Text(
+                                                  'Kullanım Koşulları ve Gizlilik Politikası’nı kabul ediyorum.',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
                                                   ),
-                                              title: const Text(
-                                                'Kullanım Koşulları ve Gizlilik Politikası’nı kabul ediyorum.',
-                                                style: TextStyle(fontSize: 14),
+                                                ),
                                               ),
                                             ),
                                             if (field.hasError)

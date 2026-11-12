@@ -4,6 +4,5 @@ Ana Sayfa: screens/home_screen.dart. Modelden beslenen üst alan ve alt navigasy
 
 HomeScreen, PostsRepository ve UserProfile alır. Örnek veri veya repository implementasyonu UI içinde oluşturulmaz; app/debug/ bu bağımlılıkları önizleme için birleştirir. Gerçek rotalar callback ile app katmanından bağlanabilir.
 
-screens/counter_screen.dart eski sayaç ekranını korur.
 
 Önizleme ve entegrasyon notları: ../../../docs/home.md
