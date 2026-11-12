@@ -15,9 +15,9 @@ export function registerCatalogRoutes(app: FastifyInstance, db: Queryable): void
   app.get(
     '/api/v1/departments',
     { schema: { response: catalogResponses.departments } },
-    async (request, reply) => {
-      await authenticate(request);
-      reply.header('cache-control', 'private, max-age=60');
+    async (_request, reply) => {
+      // Public: the registration form needs department IDs before login.
+      reply.header('cache-control', 'public, max-age=300');
       return (
         await db.query<{ id: string; name: string }>(
           'SELECT department_id AS id, name FROM departments WHERE is_active = true ORDER BY name'

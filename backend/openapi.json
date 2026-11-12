@@ -2499,42 +2499,6 @@
               }
             }
           },
-          "401": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "properties": {
-                        "code": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "details": {
-                          "type": "object",
-                          "additionalProperties": {}
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "message"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
           "500": {
             "description": "Default Response",
             "content": {
@@ -3113,6 +3077,9 @@
                     "endAt": {
                       "type": "string"
                     },
+                    "createdAt": {
+                      "type": "string"
+                    },
                     "tokenPrice": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -3201,6 +3168,7 @@
                     "description",
                     "startAt",
                     "endAt",
+                    "createdAt",
                     "tokenPrice",
                     "status",
                     "teacher"
@@ -3545,6 +3513,9 @@
                           "endAt": {
                             "type": "string"
                           },
+                          "createdAt": {
+                            "type": "string"
+                          },
                           "tokenPrice": {
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -3633,6 +3604,7 @@
                           "description",
                           "startAt",
                           "endAt",
+                          "createdAt",
                           "tokenPrice",
                           "status",
                           "teacher"
@@ -3811,6 +3783,9 @@
                       "endAt": {
                         "type": "string"
                       },
+                      "createdAt": {
+                        "type": "string"
+                      },
                       "tokenPrice": {
                         "type": "integer",
                         "minimum": -9007199254740991,
@@ -3904,6 +3879,7 @@
                       "description",
                       "startAt",
                       "endAt",
+                      "createdAt",
                       "tokenPrice",
                       "status",
                       "teacher",
@@ -4046,6 +4022,9 @@
                     "endAt": {
                       "type": "string"
                     },
+                    "createdAt": {
+                      "type": "string"
+                    },
                     "tokenPrice": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -4134,6 +4113,7 @@
                     "description",
                     "startAt",
                     "endAt",
+                    "createdAt",
                     "tokenPrice",
                     "status",
                     "teacher"
@@ -4438,6 +4418,9 @@
                     "endAt": {
                       "type": "string"
                     },
+                    "createdAt": {
+                      "type": "string"
+                    },
                     "tokenPrice": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -4526,6 +4509,7 @@
                     "description",
                     "startAt",
                     "endAt",
+                    "createdAt",
                     "tokenPrice",
                     "status",
                     "teacher"

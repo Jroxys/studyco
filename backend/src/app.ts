@@ -4,7 +4,11 @@ import jwt from '@fastify/jwt';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import Fastify, { type FastifyBaseLogger, type FastifyInstance, type FastifyRequest } from 'fastify';
+import Fastify, {
+  type FastifyBaseLogger,
+  type FastifyInstance,
+  type FastifyRequest
+} from 'fastify';
 import {
   serializerCompiler,
   validatorCompiler,
@@ -24,7 +28,7 @@ import { registerMessageRoutes } from './modules/messages/messages.routes.js';
 import { registerRequestRoutes } from './modules/requests/requests.routes.js';
 import { registerReviewRoutes } from './modules/reviews/reviews.routes.js';
 import { registerWalletRoutes } from './modules/wallet/wallet.routes.js';
-import { ConsoleMailSender, type MailSender } from './mail/mail-sender.js';
+import { createMailSender, type MailSender } from './mail/mail-sender.js';
 
 type AuthenticatedRequest = FastifyRequest & { authUserId?: string; authEmailVerified?: boolean };
 
@@ -56,6 +60,8 @@ function isPublicRoute(method: string, url: string): boolean {
   if (url === '/openapi.json' || url.startsWith('/documentation')) return true;
   if (url === '/api/v1/health' || url === '/api/v1/health/ready') return true;
   if (method === 'GET' && /^\/api\/v1\/users\/[^/]+$/.test(url)) return true;
+  // Registration needs real department IDs before an account exists.
+  if (method === 'GET' && url === '/api/v1/departments') return true;
   return new Set([
     'POST /api/v1/auth/register',
     'POST /api/v1/auth/login',
@@ -93,17 +99,19 @@ export function buildApp(dependencies: AppDependencies = {}): FastifyInstance {
       const userId = (request.user as { sub?: string }).sub;
       if (!userId) throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
       const db: Queryable = dependencies.db ?? pool;
-      const user = await db.query<{ anonymized_at: string | null; email_verified_at: string | null }>(
-        'SELECT anonymized_at::text, email_verified_at::text FROM users WHERE user_id = $1',
-        [userId]
-      );
+      const user = await db.query<{
+        anonymized_at: string | null;
+        email_verified_at: string | null;
+      }>('SELECT anonymized_at::text, email_verified_at::text FROM users WHERE user_id = $1', [
+        userId
+      ]);
       if (!user.rows[0] || user.rows[0].anonymized_at)
         throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
       if (
         appConfig.requireVerifiedEmail &&
-        (request.method === 'POST' &&
-          (/^\/api\/v1\/listings$/.test(request.url.split('?')[0]!) ||
-            /^\/api\/v1\/listings\/[^/]+\/requests$/.test(request.url.split('?')[0]!))) &&
+        request.method === 'POST' &&
+        (/^\/api\/v1\/listings$/.test(request.url.split('?')[0]!) ||
+          /^\/api\/v1\/listings\/[^/]+\/requests$/.test(request.url.split('?')[0]!)) &&
         !user.rows[0].email_verified_at
       ) {
         throw new AppError(403, 'EMAIL_NOT_VERIFIED', 'Email verification is required');
@@ -141,18 +149,18 @@ export function buildApp(dependencies: AppDependencies = {}): FastifyInstance {
                 'statusCode' in error &&
                 error.statusCode === 401
               ? new AppError(401, 'UNAUTHORIZED', 'Authentication required')
-            : typeof error === 'object' &&
-                error !== null &&
-                'statusCode' in error &&
-                typeof error.statusCode === 'number' &&
-                error.statusCode >= 400 &&
-                error.statusCode < 500
-              ? new AppError(
-                  error.statusCode,
-                  'BAD_REQUEST',
-                  error instanceof Error ? error.message : 'Bad request'
-                )
-              : mapDatabaseError(error);
+              : typeof error === 'object' &&
+                  error !== null &&
+                  'statusCode' in error &&
+                  typeof error.statusCode === 'number' &&
+                  error.statusCode >= 400 &&
+                  error.statusCode < 500
+                ? new AppError(
+                    error.statusCode,
+                    'BAD_REQUEST',
+                    error instanceof Error ? error.message : 'Bad request'
+                  )
+                : mapDatabaseError(error);
     const safeError = appError.code === 'INTERNAL' ? internalError() : appError;
 
     if (safeError.statusCode >= 500) {
@@ -219,7 +227,7 @@ export function buildApp(dependencies: AppDependencies = {}): FastifyInstance {
     registerAuthRoutes(app, {
       config: appConfig,
       db: dependencies.db ?? pool,
-      mailSender: dependencies.mailSender ?? new ConsoleMailSender(app.log, appConfig.nodeEnv)
+      mailSender: dependencies.mailSender ?? createMailSender(appConfig, app.log)
     });
     const db = dependencies.db ?? pool;
     registerCatalogRoutes(app, db);

@@ -37,7 +37,8 @@ describe('buildApp', () => {
         DATABASE_URL: 'postgresql://test:password@localhost:5432/test',
         CORS_ORIGIN: 'https://studyco.example',
         JWT_SECRET: 'a-production-jwt-secret-that-is-long-enough',
-        OTP_HMAC_SECRET: 'a-production-otp-secret-that-is-long-enough'
+        OTP_HMAC_SECRET: 'a-production-otp-secret-that-is-long-enough',
+        SMTP_URL: 'smtp://mail.studyco.example:587'
       })
     });
     apps.push(production);

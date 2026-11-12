@@ -33,6 +33,8 @@ Copy `.env.example` and set production secrets before deployment. Do not commit 
 | `REQUIRE_VERIFIED_EMAIL` | `false` | Require verified email for listings and requests |
 | `JOBS_ENABLED` | `true` | Enables expiration/settlement jobs in the server process |
 | `JOB_INTERVAL_SECONDS` | `300` | Background-job interval |
+| `SMTP_URL` | empty | SMTP connection URL for verification/reset mail; required in production. Empty in development prints codes to the log |
+| `MAIL_FROM` | `StudyCo <no-reply@studyco.local>` | Sender address |
 
 Integration tests also need `TEST_PG_ADMIN_URL` in a local, gitignored `.env.test`; see `.env.test.example`. The harness creates and removes only randomly named `studyco_test_*` databases.
 
@@ -49,7 +51,7 @@ Integration tests also need `TEST_PG_ADMIN_URL` in a local, gitignored `.env.tes
 
 ## API overview
 
-All application routes use the `/api/v1` prefix and JSON camelCase. Authenticated routes accept `Authorization: Bearer <accessJwt>`.
+All application routes use the `/api/v1` prefix and JSON camelCase. Authenticated routes accept `Authorization: Bearer <accessJwt>`. `GET /departments` is public so the registration form can list departments.
 
 | Area | Routes |
 | --- | --- |

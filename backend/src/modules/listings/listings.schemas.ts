@@ -17,6 +17,7 @@ const listing = z.object({
   description: z.string().nullable(),
   startAt: z.string(),
   endAt: z.string(),
+  createdAt: z.string(),
   tokenPrice: z.number().int(),
   status: z.string(),
   teacher: z.object({

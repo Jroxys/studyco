@@ -162,7 +162,7 @@ describe('full flow and authentication boundary', () => {
       ['PATCH', '/api/v1/me'],
       ['POST', '/api/v1/me/change-password'],
       ['DELETE', '/api/v1/me'],
-      ['GET', '/api/v1/departments'],
+      // GET /api/v1/departments is intentionally public (registration form).
       ['GET', `/api/v1/departments/${id}/courses`],
       ['GET', '/api/v1/courses'],
       ['GET', '/api/v1/locations'],

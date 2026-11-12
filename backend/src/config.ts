@@ -26,7 +26,14 @@ const configSchema = z.object({
   JOBS_ENABLED: booleanFromEnvironment.default(true),
   JOB_INTERVAL_SECONDS: z.coerce.number().int().positive().default(300),
   PG_POOL_MAX: z.coerce.number().int().positive().default(10),
-  PG_CONNECTION_TIMEOUT_MILLIS: z.coerce.number().int().positive().default(5_000)
+  PG_CONNECTION_TIMEOUT_MILLIS: z.coerce.number().int().positive().default(5_000),
+  SMTP_URL: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => (value ? value : undefined))
+    .pipe(z.string().url().optional()),
+  MAIL_FROM: z.string().trim().min(3).default('StudyCo <no-reply@studyco.local>')
 });
 
 export type Config = {
@@ -49,6 +56,8 @@ export type Config = {
   jobIntervalSeconds: number;
   pgPoolMax: number;
   pgConnectionTimeoutMillis: number;
+  smtpUrl: string | undefined;
+  mailFrom: string;
 };
 
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env): Config {
@@ -60,8 +69,16 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): Config
         throw new Error(`${name} must be set in production`);
       }
     }
-    if (parsed.DATABASE_URL === developmentDatabaseUrl || parsed.CORS_ORIGIN === developmentCorsOrigin) {
+    if (
+      parsed.DATABASE_URL === developmentDatabaseUrl ||
+      parsed.CORS_ORIGIN === developmentCorsOrigin
+    ) {
       throw new Error('DATABASE_URL and CORS_ORIGIN must be explicitly configured in production');
+    }
+    if (!parsed.SMTP_URL) {
+      throw new Error(
+        'SMTP_URL must be set in production so verification and reset codes are delivered'
+      );
     }
     if (parsed.JWT_SECRET === parsed.OTP_HMAC_SECRET) {
       throw new Error('JWT_SECRET and OTP_HMAC_SECRET must differ in production');
@@ -87,7 +104,9 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): Config
     jobsEnabled: parsed.JOBS_ENABLED,
     jobIntervalSeconds: parsed.JOB_INTERVAL_SECONDS,
     pgPoolMax: parsed.PG_POOL_MAX,
-    pgConnectionTimeoutMillis: parsed.PG_CONNECTION_TIMEOUT_MILLIS
+    pgConnectionTimeoutMillis: parsed.PG_CONNECTION_TIMEOUT_MILLIS,
+    smtpUrl: parsed.SMTP_URL,
+    mailFrom: parsed.MAIL_FROM
   };
 }
 

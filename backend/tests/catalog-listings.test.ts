@@ -95,11 +95,13 @@ async function create(
 }
 
 describe('catalog', () => {
-  it('requires auth and returns active records filtered by department', async () => {
+  it('requires auth (except departments, used by registration) and filters by department', async () => {
     const value = await app();
     expect((await value.inject({ method: 'GET', url: '/api/v1/departments' })).statusCode).toBe(
-      401
+      200
     );
+    expect((await value.inject({ method: 'GET', url: '/api/v1/courses' })).statusCode).toBe(401);
+    expect((await value.inject({ method: 'GET', url: '/api/v1/locations' })).statusCode).toBe(401);
     const user = await account(value);
     const first = await department();
     const second = await department(1);

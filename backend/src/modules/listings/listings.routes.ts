@@ -20,6 +20,7 @@ type ListingRow = {
   description: string | null;
   startAt: string;
   endAt: string;
+  createdAt: string;
   tokenPrice: number;
   status: string;
   teacherId: string;
@@ -74,6 +75,7 @@ function dto(row: ListingRow) {
     description: row.description,
     startAt: new Date(row.startAt).toISOString(),
     endAt: new Date(row.endAt).toISOString(),
+    createdAt: new Date(row.createdAt).toISOString(),
     tokenPrice: row.tokenPrice,
     status: row.status,
     teacher: {
@@ -88,7 +90,7 @@ function dto(row: ListingRow) {
   };
 }
 
-const selectListing = `SELECT l.listing_id AS id, l.course_id AS "courseId", c.course_name AS "courseName", l.location_id AS "locationId", loc.name AS "locationName", l.topic, l.description, l.start_at::text AS "startAt", l.end_at::text AS "endAt", l.token_price AS "tokenPrice", s.effective_status AS status, u.user_id AS "teacherId", u.first_name AS "teacherFirstName", left(u.last_name, 1) AS "teacherLastNameInitial", u.department_id AS "teacherDepartmentId", avg(r.rating)::float AS "ratingAverage", count(r.review_id)::int AS "ratingCount" FROM v_listing_state s JOIN listings l ON l.listing_id = s.listing_id JOIN courses c ON c.course_id = l.course_id JOIN locations loc ON loc.location_id = l.location_id JOIN users u ON u.user_id = l.teacher_id LEFT JOIN reviews r ON r.reviewee_id = u.user_id`;
+const selectListing = `SELECT l.listing_id AS id, l.course_id AS "courseId", c.course_name AS "courseName", l.location_id AS "locationId", loc.name AS "locationName", l.topic, l.description, l.start_at::text AS "startAt", l.end_at::text AS "endAt", l.created_at::text AS "createdAt", l.token_price AS "tokenPrice", s.effective_status AS status, u.user_id AS "teacherId", u.first_name AS "teacherFirstName", left(u.last_name, 1) AS "teacherLastNameInitial", u.department_id AS "teacherDepartmentId", avg(r.rating)::float AS "ratingAverage", count(r.review_id)::int AS "ratingCount" FROM v_listing_state s JOIN listings l ON l.listing_id = s.listing_id JOIN courses c ON c.course_id = l.course_id JOIN locations loc ON loc.location_id = l.location_id JOIN users u ON u.user_id = l.teacher_id LEFT JOIN reviews r ON r.reviewee_id = u.user_id`;
 const selectMyListing = selectListing.replace(
   ' FROM v_listing_state',
   ', (SELECT count(*)::int FROM lesson_requests lr WHERE lr.listing_id = l.listing_id AND lr.request_status = \'PENDING\') AS "pendingRequestCount" FROM v_listing_state'
