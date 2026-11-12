@@ -11,7 +11,7 @@ Node.js backend bağlanır. **Önce `docs/RAPOR.md` dosyasını okuyun** (kararl
 ## Kurulum (kendi makinenizde)
 
 ```bash
-cd ~/Desktop/studyco_db
+cd database   # repo kökünden
 bash scripts/setup_db.sh        # 'studyco' veritabanını oluşturur, migration'ları uygular, bölümleri yükler
 bash scripts/run_tests.sh       # testleri GEÇİCİ bir veritabanında çalıştırır, sonra o geçici veritabanını siler
 ```
@@ -26,8 +26,8 @@ bash scripts/run_tests.sh       # testleri GEÇİCİ bir veritabanında çalış
 
 ### Gerçek ders ve kafe verisi
 
-`courses` ve `locations` bilerek **boş** gelir. Doğrulanmış veriyi `seeds/data/courses.csv` ve `seeds/data/locations.csv`
-dosyalarına yazın (başlık satırları hazır), sonra: `psql -d studyco -f seeds/load_catalog.sql`.
+`courses` ve `locations` tabloları migration'larla boş gelir. Ders (~617) ve kafe (9) listesi `seeds/data/courses.csv` ve
+`seeds/data/locations.csv` dosyalarında hazırdır; `database/` klasöründeyken yükleyin: `psql -d studyco -f seeds/load_catalog.sql`.
 Yüklenene kadar uygulamada ilan açılamaz. Test sahte verisi (`tests/fixtures.sql`) yalnızca geçici test veritabanına girer.
 
 ## Klasör yapısı ve okuma sırası (öğrenmek için)
