@@ -1,0 +1,252 @@
+{
+  "schema_version": "1.0",
+  "project": "studyco-backend",
+  "updated_at": "2026-11-05T00:44:07Z",
+  "queued": [],
+  "running": [],
+  "done": [
+    {
+      "id": "be-00-scaffold",
+      "title": "Scaffold project (PLAN phase 0)",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "Implement PLAN.md phase 0: package.json (scripts: dev, build, start, check = tsc --noEmit + eslint, test = vitest run), tsconfig strict ESM, eslint flat config, .gitignore (node_modules, dist, .env, .env.test, .orchestra/logs), .env.example, .env.test.example (TEST_PG_ADMIN_URL placeholder only), src/config.ts, src/errors.ts, src/db/pool.ts (query helper + withTx with retry on 40P01/40001), src/db/errors.ts (full mapping table from PLAN section 5, with unit tests for EVERY row), src/app.ts (buildApp with error-handler plugin, helmet, cors, rate-limit, zod type provider), src/server.ts with graceful shutdown, GET /api/v1/health. Tests in this task must NOT need a database (inject a fake pool for withTx tests). Use exact latest stable versions via npm install. Read PLAN.md and AGENTS.md first. Follow the Hard rules. When done write the report and make sure npm run check and npm test pass.",
+      "depends_on": [],
+      "status": "done",
+      "created_at": "2026-11-04T18:56:21Z",
+      "started_at": "2026-11-04T21:56:34Z",
+      "finished_at": "2026-11-04T19:07:37.709Z",
+      "report": ".orchestra/reports/be-00-scaffold-impl.md",
+      "notes": "npm install + 5 type fixes by Claude (codex sandbox has no network).",
+      "failure_reason": "Tests failed",
+      "log": ".orchestra\\logs\\be-00-scaffold-tests-20261104-220500.log"
+    },
+    {
+      "id": "be-01-test-harness",
+      "title": "DB test harness (PLAN phase 1)",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "Implement PLAN.md section 4: vitest globalSetup/teardown that reads TEST_PG_ADMIN_URL from .env.test or process env, creates a uniquely named temp database studyco_test_<random>, applies every ../database/migrations/up/*.sql in order using pg, loads ../database/seeds/001_departments.sql, exposes the URL to tests, and removes ONLY that temp database at teardown (also on failure). Add tests/helpers: factories (createUser, createCourse, createLocation, createListing), a test-only time-travel helper that calls DB functions with explicit p_now, and an app.inject authed helper. Add a smoke test: schema applied, welcome bonus 10 tokens exists after inserting a user, v_integrity_violations is empty. Add a test that fails if any file under src/ contains the text p_now. If TEST_PG_ADMIN_URL is missing, fail fast with a clear message. Separate vitest projects: unit (no DB) and integration (DB). Read PLAN.md and AGENTS.md first. Follow the Hard rules. When done write the report and make sure npm run check and npm test pass.",
+      "depends_on": [
+        "be-00-scaffold"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T18:56:21Z",
+      "started_at": "2026-11-04T22:07:53Z",
+      "finished_at": "2026-11-04T22:14:48Z",
+      "report": ".orchestra\\reports\\be-01-test-harness-codex.md",
+      "notes": ""
+    },
+    {
+      "id": "be-02-auth",
+      "title": "Auth, me, refresh tokens (PLAN phase 2)",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "Implement PLAN.md section 6 Auth and Me/users. The refresh_tokens table comes from ../database/migrations/up/006_refresh_tokens.sql which Claude adds (if the file is missing when you start, STOP and say so in the report). Use argon2id via the argon2 package, @fastify/jwt, MailSender interface + ConsoleMailSender in src/mail. OTP via crypto.randomInt, HMAC-SHA256 with OTP_HMAC_SECRET from config, call issue_auth_token / verify_auth_token and COMMIT after INVALID. Implement refresh rotation with family revocation on reuse. Tests: register (duplicate email/phone, bad phone, underage, weak password), login (wrong password vs unknown email same response), refresh reuse, logout idempotent, verify-email all five outcomes incl. lockout, forgot/reset without enumeration, change-password, DELETE /me with active obligation, anonymized user cannot log in, rate limit on login. Read PLAN.md and AGENTS.md first. Follow the Hard rules. When done write the report and make sure npm run check and npm test pass.",
+      "depends_on": [
+        "be-01-test-harness"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T18:56:21Z",
+      "started_at": "2026-11-04T22:15:22Z",
+      "finished_at": "2026-11-04T22:32:09Z",
+      "report": ".orchestra\\reports\\be-02-auth-codex.md",
+      "notes": ""
+    },
+    {
+      "id": "be-02b-auth-complete",
+      "title": "Complete auth: response schemas and full test matrix",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "Task be-02-auth was left incomplete (see .orchestra/reports/be-02-auth-impl.md Deviations). Finish it. 1) Add Zod response schemas for EVERY route in src/modules/auth/auth.routes.ts (PLAN hard rule 4: no password_hash, token_hash, or other users contact data in any response); split the file into auth.routes/schemas/service/repo as in PLAN section 3 if it is a single large file. 2) Write the full integration test matrix from the be-02-auth task: register (duplicate email, duplicate phone, bad phone, underage, weak password, email trimmed/lowercased, phone normalized to E.164), login (wrong password vs unknown email identical response, anonymized user cannot log in), refresh reuse revokes family, logout idempotent, verify-email all five outcomes including LOCKED after max attempts and that failed attempts are committed, resend cooldown, forgot-password returns 202 for unknown email, reset-password success revokes refresh tokens and old password stops working, change-password, DELETE /me blocked with USER_HAS_ACTIVE_OBLIGATIONS (set up through accepted lesson using SQL fixtures/time-travel helper), rate limit on login returns 429. 3) Re-read the auth code for security issues (timing on unknown email, JWT from body, secrets in logs) and fix. Network access is enabled, run npm run check and npm test yourself and iterate until green. In the report list each PLAN auth endpoint and the test names covering it. Read PLAN.md and AGENTS.md first.",
+      "depends_on": [
+        "be-02-auth"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T19:32:38.784Z",
+      "started_at": "2026-11-04T22:32:41Z",
+      "finished_at": "2026-11-04T22:43:31Z",
+      "report": ".orchestra\\reports\\be-02b-auth-complete-codex.md",
+      "notes": ""
+    },
+    {
+      "id": "be-03-catalog-listings",
+      "title": "Catalog and listings (PLAN phase 3)",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "FIRST (carry-over from auth): add endpoint tests for GET /me, PATCH /me (phone change normalization and duplicate, DEPARTMENT_CHANGE_BLOCKED with active listings) and extract auth query code out of auth.routes.ts into auth.service.ts/auth.repo.ts without changing behavior. THEN: Implement PLAN.md section 6 Catalog, Listings and GET /users/:id public profile. Keyset pagination with opaque base64url cursor (validate and reject tampered cursors with 400). q filter must escape LIKE wildcards. Tests: every DB error code reachable through POST /listings (COURSE_DEPARTMENT_MISMATCH, COURSE_INACTIVE, LOCATION_INACTIVE_OR_UNKNOWN, LISTING_START_IN_PAST), pagination stability with equal start_at, filters, owner-only PATCH, locked core fields after first request (409), excluded own listings, EXPIRED not shown. Read PLAN.md and AGENTS.md first. Follow the Hard rules. When done write the report and make sure npm run check and npm test pass.",
+      "depends_on": [
+        "be-02b-auth-complete"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T18:56:21Z",
+      "started_at": "2026-11-04T22:43:58Z",
+      "finished_at": "2026-11-04T22:51:44Z",
+      "report": ".orchestra\\reports\\be-03-catalog-listings-codex.md",
+      "notes": ""
+    },
+    {
+      "id": "be-03b-listings-tests",
+      "title": "Fill listings/catalog test gaps",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "Read PLAN.md, AGENTS.md and tests/catalog-listings.test.ts. Coverage is too coarse. Split into separate focused it() cases and ADD missing ones, each with real assertions on status code, error code and DB state: POST /listings -> COURSE_DEPARTMENT_MISMATCH, COURSE_INACTIVE, LOCATION_INACTIVE_OR_UNKNOWN, LISTING_START_IN_PAST, endAt<=startAt (400), duration > 8h (400), tokenPrice 4 (400), unauthenticated 401. GET /listings -> filters departmentId/courseId/locationId/from/to/maxPrice individually, q with % and _ treated literally, cursor pagination stable when several listings share the same start_at (no duplicates, no gaps, all pages together equal full set), tampered cursor 400, limit bounds, own listings excluded unless mine=true, listing whose start passed (EXPIRED, insert via time-travel/fixture technique) not shown, BOOKED not shown. PATCH /listings/:id -> owner ok, non-owner 403, unknown 404, sending time/price/course/location fields -> 400, LISTING_CORE_FIELDS_LOCKED path is NOT reachable through PATCH so instead assert after a pending request exists that topic/description edit still works. GET /listings/:id 404 for unknown/invalid uuid(400). GET /me/listings only own with all statuses. GET /users/:id: no email/phone/password fields in body, 404 unknown. Catalog: inactive course/location hidden, courses filter by department. Fix any bug the new tests reveal in src. Run npm run check and npm test until green.",
+      "depends_on": [
+        "be-03-catalog-listings"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T19:52:18.702Z",
+      "started_at": "2026-11-04T22:52:21Z",
+      "finished_at": "2026-11-04T23:03:32Z",
+      "report": ".orchestra\\reports\\be-03b-listings-tests-codex.md",
+      "notes": ""
+    },
+    {
+      "id": "be-04-requests-wallet",
+      "title": "Requests lifecycle and wallet (PLAN phase 4)",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "Implement PLAN.md section 6 Requests and Wallet. Accept/reject/confirm via the SQL functions only. Tests through the HTTP API: duplicate request, own listing, request on BOOKED/expired listing, accept with insufficient balance, accept auto-cancels conflicting pending requests (TIME_CONFLICT) for both roles, reject, confirm too early, confirm after window (use the time-travel helper), both-confirm settlement moves tokens, expired-confirmation settlement variants via process_expired_confirmations(p_now) in the helper, MANUAL_REVIEW when nobody confirms, authz (third party gets 404/403), wallet transactions pagination. Concurrency tests with Promise.all via the API: two teachers/requests racing on the same listing, same student accepted in two overlapping lessons, double confirm; assert no deadlock and v_integrity_violations stays empty after every scenario. Read PLAN.md and AGENTS.md first. Follow the Hard rules. When done write the report and make sure npm run check and npm test pass.",
+      "depends_on": [
+        "be-03b-listings-tests"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T18:56:21Z",
+      "started_at": "2026-11-04T23:03:57Z",
+      "finished_at": "2026-11-04T23:11:01Z",
+      "report": ".orchestra\\reports\\be-04-requests-wallet-codex.md",
+      "notes": ""
+    },
+    {
+      "agent": "codex",
+      "priority": "p1",
+      "status": "done",
+      "created_at": "2026-11-04T20:11:50.541Z",
+      "started_at": "2026-11-04T23:11:52Z",
+      "finished_at": "2026-11-04T23:24:13Z",
+      "report": ".orchestra\\reports\\be-04b-requests-lifecycle-tests-codex.md",
+      "notes": "",
+      "id": "be-04b-requests-lifecycle-tests",
+      "title": "Requests lifecycle tests and refactor",
+      "depends_on": [
+        "be-04-requests-wallet"
+      ],
+      "prompt": "Task be-04-requests-wallet is incomplete: tests/requests-wallet.test.ts has only 2 coarse tests and src/modules/requests/requests.routes.ts is dense one-line code. Do: (1) refactor requests module into requests.routes.ts / requests.service.ts / requests.repo.ts / requests.schemas.ts with readable multi-line formatting and a wallet module (src/modules/wallet) for the wallet routes, no behavior change. (2) Write these scenarios as separate tests: duplicate request -> ALREADY_REQUESTED; request on own listing -> CANNOT_REQUEST_OWN_LISTING; request on BOOKED listing -> LISTING_NOT_PUBLISHED; request on listing whose start passed -> LISTING_EXPIRED; accept with insufficient balance -> INSUFFICIENT_BALANCE 402 and nothing changed; accept happy path (HOLD ledger row, held balance, listing BOOKED, conversationId returned, 2 accepted_slots); accept by non-owner teacher -> 403; accept already accepted/rejected -> REQUEST_NOT_PENDING 409; accept auto-cancels other pending requests of the same listing (LISTING_ALREADY_BOOKED) and overlapping pending requests of both participants in other listings (TIME_CONFLICT); accepting a lesson overlapping an already accepted lesson of the student or teacher -> TIME_CONFLICT; reject happy path no token movement; free listing (token_price 0) accept/confirm with no ledger rows; confirm before lesson end -> CONFIRMATION_TOO_EARLY; confirm after end+24h -> CONFIRMATION_WINDOW_CLOSED; confirm by third party -> 403/404; single confirm then both confirm -> settlement (student held decreases, teacher available increases by agreed amount, completion COMPLETED, basis BOTH_CONFIRMED, listing COMPLETED); same user confirming twice is idempotent; process_expired_confirmations(p_now) via helper with only teacher confirmed -> TEACHER_ONLY_AT_DEADLINE, only student -> STUDENT_ONLY_AT_DEADLINE, nobody -> MANUAL_REVIEW with tokens still held; expire_stale_requests(p_now) cancels started pending requests with LISTING_EXPIRED; GET /requests/:id by stranger -> 404; GET /me/requests role/status filters and pagination; GET /wallet and GET /wallet/transactions pagination order with equal timestamps; unauthenticated 401 for each route. Read PLAN.md, AGENTS.md, ../database/docs/data_dictionary.md and ../database/tests/tests.sql first. Use tests/helpers (factories, time-travel with explicit p_now). Every test must assert HTTP status, API error code AND resulting DB state (wallet balances, lesson_requests columns, accepted_slots rows); after each scenario assert SELECT count(*) FROM v_integrity_violations is 0. One focused it() per scenario, descriptive names. In your report list every scenario with its test name; the report will be audited against the test file with grep, so do not claim tests that do not exist. Run npm run check and npm test until green."
+    },
+    {
+      "agent": "codex",
+      "priority": "p1",
+      "status": "done",
+      "created_at": "2026-11-04T20:11:50.541Z",
+      "started_at": "2026-11-04T23:24:48Z",
+      "finished_at": "2026-11-04T23:34:57Z",
+      "report": ".orchestra\\reports\\be-04c-concurrency-tests-codex.md",
+      "notes": "",
+      "id": "be-04c-concurrency-tests",
+      "title": "Concurrency tests through the API",
+      "depends_on": [
+        "be-04b-requests-lifecycle-tests"
+      ],
+      "prompt": "Write tests/concurrency.test.ts (integration project) that fire requests in parallel with Promise.all against app.inject (use a Pool with enough connections, e.g. max 20). Scenarios, each repeated 10 rounds with fresh data per round: (C1) two different students request the same listing, teacher accepts both requests at once -> exactly one 200 and one 409 (LISTING_ALREADY_BOOKED or REQUEST_NOT_PENDING), exactly one ACCEPTED row, one HOLD; (C2) one student with two pending requests on two OVERLAPPING listings of different teachers, both teachers accept at once -> exactly one succeeds, other is TIME_CONFLICT; (C3) same request accepted by teacher twice at once -> one 200, other 409, one HOLD row only; (C4) student and teacher confirm the same lesson at the same time after time travel -> final state COMPLETED, exactly one SETTLEMENT_DEBIT and one SETTLEMENT_CREDIT; (C5) accept racing with a brand new request on the same listing -> no PENDING request may exist on a BOOKED listing afterwards; (C6) student with balance for exactly one paid lesson gets two accepts in parallel for different non-overlapping listings -> one succeeds, one INSUFFICIENT_BALANCE. Assert no 500 responses and no deadlock errors (40P01) in any scenario, and v_integrity_violations empty after every round. Also add a retry test for withTx if not already covered by unit tests. Also run the file 3 times in a row to check it is not flaky and mention results. Read PLAN.md, AGENTS.md, ../database/docs/data_dictionary.md and ../database/tests/tests.sql first. Use tests/helpers (factories, time-travel with explicit p_now). Every test must assert HTTP status, API error code AND resulting DB state (wallet balances, lesson_requests columns, accepted_slots rows); after each scenario assert SELECT count(*) FROM v_integrity_violations is 0. One focused it() per scenario, descriptive names. In your report list every scenario with its test name; the report will be audited against the test file with grep, so do not claim tests that do not exist. Run npm run check and npm test until green. NOTE: test files share one temp database and run in parallel, so a global count of v_integrity_violations is nondeterministic. Instead filter the view to the entities created by the test (e.g. WHERE entity_id = ANY(ids of that round wallets, requests, listings as text)); and put concurrency.test.ts in a vitest project/config that runs it alone (fileParallelism off for it) so a global check can also be asserted once at the end of the file."
+    },
+    {
+      "id": "be-05-messages-reviews",
+      "title": "Messages and reviews (PLAN phase 5)",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "Implement PLAN.md section 6 Messages and Reviews. Participant check on every read AND write (is_conversation_participant). Tests: non-participant read/write 403, empty/whitespace/too long body, unread counts, mark read only affects the other party's messages, review before completion (REVIEW_REQUIRES_COMPLETED_LESSON), duplicate review (ALREADY_REVIEWED), rating bounds, reviewee derived server-side, user rating aggregates reflected in GET /users/:id. Read PLAN.md and AGENTS.md first. Follow the Hard rules. When done write the report and make sure npm run check and npm test pass.",
+      "depends_on": [
+        "be-04c-concurrency-tests"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T18:56:21Z",
+      "started_at": "2026-11-04T23:37:17Z",
+      "finished_at": "2026-11-04T23:49:33Z",
+      "report": ".orchestra\\reports\\be-05-messages-reviews-codex.md",
+      "notes": ""
+    },
+    {
+      "id": "be-06-jobs-ops",
+      "title": "Jobs, readiness, docs (PLAN phase 6)",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "Implement PLAN.md section 7 jobs with pg_try_advisory_lock, JOBS_ENABLED flag, runOnce(), graceful stop; GET /health/ready with v_integrity_violations; /openapi.json from the Zod schemas (swagger UI only when NODE_ENV is not production) plus npm run openapi script writing openapi.json; backend README.md (setup, env table, scripts, how to run tests, API overview, error codes). Tests: jobs settle an expired lesson, two concurrent runOnce calls do not overlap, readiness returns 503 when a violation is injected in the temp DB. Read PLAN.md and AGENTS.md first. Follow the Hard rules. When done write the report and make sure npm run check and npm test pass.",
+      "depends_on": [
+        "be-05-messages-reviews"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T18:56:21Z",
+      "started_at": "2026-11-04T23:50:37Z",
+      "finished_at": "2026-11-05T00:05:02Z",
+      "report": ".orchestra\\reports\\be-06-jobs-ops-codex.md",
+      "notes": ""
+    },
+    {
+      "id": "be-07-e2e-hardening",
+      "title": "End-to-end and hardening (PLAN phase 7)",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "(d) tests/concurrency.test.ts C3 once exceeded the 5s timeout when the whole suite ran; raise the timeout for the concurrency tests to 60s (per-file or project testTimeout) and run the full npm test 3 times to confirm stability. CLEANUP FIRST: (a) GET /users/:id returns ratingAverage 0 for users without reviews; it must be null (schema is nullable) - fix and test. (b) Reformat dense one-line code and tests (tests/messages-reviews.test.ts, src/modules/*/*.routes.ts, auth.routes.ts) into readable multi-line code, extract auth queries into auth.service.ts/auth.repo.ts per PLAN section 3, add prettier config and npm run format, with no behavior change. (c) Add GET/PATCH /me endpoint tests if missing. THEN: Write one full-flow e2e test (register two users, teacher creates listing, student requests, teacher accepts, chat, both confirm after time travel, tokens moved, both review, wallets and ratings correct, v_integrity_violations empty). Add a test enumerating every route and asserting it rejects missing/invalid JWT with 401 (except the explicit public list). Add npm audit-free check note, coverage via vitest --coverage (report thresholds: 85% lines on src/modules). Fix any bug found. List remaining risks in the report. Read PLAN.md and AGENTS.md first. Follow the Hard rules. When done write the report and make sure npm run check and npm test pass.",
+      "depends_on": [
+        "be-06-jobs-ops"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T18:56:21Z",
+      "started_at": "2026-11-05T00:07:00Z",
+      "finished_at": "2026-11-05T00:27:48Z",
+      "report": ".orchestra\\reports\\be-07-e2e-hardening-codex.md",
+      "notes": ""
+    },
+    {
+      "id": "review-money-auth",
+      "title": "Read-only security/correctness review of money and auth flows",
+      "agent": "gemini",
+      "priority": "p1",
+      "prompt": "You are a read-only reviewer. Do not edit any file. Read PLAN.md, ../database/docs/data_dictionary.md and ../database/migrations/up/005_functions_views.sql, then review src/modules/requests, src/modules/wallet, src/modules/auth, src/modules/messages, src/modules/reviews, src/modules/jobs, src/plugins or app.ts, src/db. Look for: (1) any way a user can read or act on another users data (IDOR), (2) any path that changes tokens/wallet/request status without the SQL functions, (3) SQL injection or unsafe dynamic SQL, (4) JWT/refresh/OTP/password flaws, timing or enumeration leaks, rate-limit bypass, (5) transactions that are not committed or rolled back correctly, connection leaks, missing withTx retry, (6) response fields that leak private data, (7) any place production code passes p_now. Write the report to .orchestra/reports/review-money-auth-agy.md as a list: severity (high/medium/low), file:line, problem, concrete fix. Say explicitly if you found nothing for a category.",
+      "depends_on": [
+        "be-07-e2e-hardening"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T21:30:37.161Z",
+      "started_at": "2026-11-05T00:30:39Z",
+      "finished_at": "2026-11-05T00:31:25Z",
+      "report": ".orchestra\\reports\\review-money-auth-agy.md",
+      "notes": ""
+    },
+    {
+      "id": "be-08-security-fixes",
+      "title": "Fix review findings (JWT expiry, anonymized users, reset brute force, etc.)",
+      "agent": "codex",
+      "priority": "p1",
+      "prompt": "Read PLAN.md and AGENTS.md. Fix these review findings, each with a failing-then-passing test. HIGH: (H1) access JWT never expires: configure @fastify/jwt with sign.expiresIn = config.jwtExpiresIn (default 15m), HS256 only in sign and verify; test that token has exp and an expired token gets 401. (H2) anonymized/deleted users keep a valid JWT: add ONE shared auth guard (onRequest/preHandler decorator) that after jwtVerify checks users.anonymized_at IS NULL (401 otherwise) and use it for every protected route, so each module reads the user id from the same place; test that after DELETE /me the old access token gets 401 on requests, wallet, messages, reviews and listings routes. (H3) password-reset OTP brute force: forgot-password needs a per-account cooldown (60s, atomic in SQL or via the existing token row created_at) and per-email rate limit (3/hour) using rate-limit keyGenerator on the normalized email, PLUS a per-user cumulative failed-attempt lock for PASSWORD_RESET (e.g. 10 failures across codes within 1 hour -> LOCKED 15 min; store in a small table or reuse columns, if a table is needed STOP and say so in report instead of editing ../database). MEDIUM: (M1) enforce REQUIRE_VERIFIED_EMAIL in the shared guard for POST /listings and POST /listings/:id/requests with 403 EMAIL_NOT_VERIFIED; add stricter rate limits on register, refresh, verify-email, reset-password. (M3) reset-password returns uniform 400 INVALID_CODE for unknown email/expired/locked/invalid; forgot-password swallows and logs mail errors and never differs in status; dummy argon2 verify when user is anonymized. (M4) wrap accept/reject/confirm and request/review/message inserts in the withTx retry helper (single statement body is fine) for 40P01/40001. (M5) pool: pool.on(error) logging, statement_timeout, lock_timeout, idle_in_transaction_session_timeout, max and connectionTimeoutMillis from config with safe defaults. (M6) in production require explicit DATABASE_URL, CORS_ORIGIN, JWT_SECRET, OTP_HMAC_SECRET, reject values starting with change-this and require JWT_SECRET != OTP_HMAC_SECRET; ConsoleMailSender logs the code only when NODE_ENV is development; set trustProxy from env TRUST_PROXY (default false); update .env.example with obviously-invalid placeholders and no shared secret. (M7) wallet transactions cursor must be built from the raw DB row timestamp with microsecond precision (use to_char or created_at::text), test with three rows inserted in the same millisecond and page size 1 that no row is skipped or duplicated. LOW: (L2) reset-password consumes OTP and updates password in ONE transaction; (L7) map Postgres 22007/22008 to 400 BAD_CURSOR and honour Fastify error.statusCode 400-499 in the error handler; (L11) listing PATCH WHERE also filters teacher_id = caller; (L4) accept/reject/confirm/review on a request the caller is not part of returns 404 not 403; (L8) /openapi.json only when NODE_ENV is not production. Run npm run check and npm test until green (network is enabled). In the report list each finding id with the test name proving it.",
+      "depends_on": [
+        "be-07-e2e-hardening"
+      ],
+      "status": "done",
+      "created_at": "2026-11-04T21:35:07.358Z",
+      "started_at": "2026-11-05T00:35:09Z",
+      "finished_at": "2026-11-04T21:47:40.821Z",
+      "report": ".orchestra/reports/be-08-security-fixes-impl.md",
+      "notes": "Codex hit usage limit at the end; work verified by Claude, 2 missing tests (M7, M1) added by Claude. Open: cumulative reset lock needs DB table.",
+      "failure_reason": "codex exited 1. Log: .orchestra\\logs\\be-08-security-fixes-codex-20261105-004407.log",
+      "log": ".orchestra\\logs\\be-08-security-fixes-error-20261105-004407.log"
+    }
+  ],
+  "failed": [],
+  "_task_schema": {
+    "id": "string — unique kebab-case slug, e.g. add-login-tests",
+    "title": "string — one line",
+    "agent": "claude | codex | gemini | antigravity",
+    "priority": "p1 (critical) | p2 (normal) | p3 (low)",
+    "prompt": "string — full instruction sent to the agent",
+    "depends_on": [
+      "other-task-id"
+    ],
+    "status": "queued | running | done | failed",
+    "created_at": "ISO8601",
+    "started_at": "ISO8601 or null",
+    "finished_at": "ISO8601 or null",
+    "report": "relative path under .orchestra/reports/ or null",
+    "notes": "optional context for the next agent"
+  }
+}
