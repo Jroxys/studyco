@@ -20,7 +20,12 @@ List<StudyNotification> previewNotifications(List<Application> applications) {
     createdAt: now.subtract(age),
     target: target,
     targetId:
-        applicationId == null
+        target == NotificationTarget.conversation
+            ? applications
+                .where((a) => a.id == 'mock-completed-outgoing')
+                .firstOrNull
+                ?.conversationId
+            : applicationId == null
             ? null
             : applications.firstWhere((item) => item.id == applicationId).id,
   );

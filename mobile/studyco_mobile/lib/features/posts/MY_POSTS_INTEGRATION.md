@@ -1,21 +1,24 @@
 # İlanlarım entegrasyonu
 
-Mevcut kaynak yalnızca InMemoryPostsRepository: oluşturma, düzenleme ve silme oturumluk işlemlerdir; HTTP isteği veya kalıcı kayıt yapılmaz.
+Aktif feature/flutter-ui dalında InMemoryPostsRepository kullanılır. Oluşturma, düzenleme ve silme oturumluk mock işlemlerdir; gerçek HTTP veya kalıcı kayıt yoktur. Teslim denetiminde yerel origin/integration/backend-flutter (786449e) backend kaynakları Git nesnelerinden salt okunur incelendi; canlı servis doğrulanmadı.
 
-UserProfile.id ve Post.authorId gerçek entegrasyonda doğrulanmış kullanıcı kimliğiyle doldurulmalıdır. Kimlik yokken aynı UserProfile nesnesine bağlı oturum kimliği kullanılır. Yazar adıyla eşleme yapılmaz; authorId olmayan eski örnek ilanlar İlanlarım listesine alınmaz. Sunucu her güncelleme/silmede sahipliği ayrıca doğrulamalıdır.
+UserProfile.id / Post.authorId gerçek entegrasyonda JWT kullanıcısı ve sunucu UUID’si olmalıdır. postsOwnerId fallback’i yalnız yerel kimliktir; yazar adıyla sahiplik eşlemesi yapılmaz. Oluşturma, detay, İlanlarım ve başvurular aynı repository örneklerini paylaşır.
 
-Bu checkout içinde backend kodu veya güncelleme DTO sözleşmesi bulunmadığından hiçbir alan için gerçek API desteği varsayılmadı. Başlık/ders (courseId veya manuel başlık), konu, açıklama, tarih, başlangıç/bitiş zamanı ve saat dilimi, buluşma konumu (locationId), kahve/token miktarı ve ücretsiz seçeneği backend ile ayrı ayrı doğrulanmalıdır. Bölüm ve konu kategorisi düzenlemede korunur. Token cüzdanı işlemi yapılmaz.
+## Doğrulanmış API sınırı
 
-PostsRepository.supportsFullPostEditing varsayılan olarak false; desteklenmeyen adaptörde düzenleme kaydedilmez. Yalnızca bellek kaynağı şimdilik tüm alanları destekler. Kısmi güncelleme destekleyen gerçek adaptör için alan bazında yetenekler ve salt okunur form alanları eklenmeden bu bayrak açılmamalıdır. updatePost/deletePost varsayılanları hata döndürür; uzak adaptör başarı cevabından sonra kendi snapshot'ını yenileyip notifyListeners çağırmalıdır. İstemci başarısız işlemde kaydı kaldırmaz veya formu kapatmaz.
+- GET /api/v1/me/listings: kullanıcının ilanları; dizi yanıtı, pendingRequestCount içerir.
+- POST /api/v1/listings: courseId, locationId, topic, isteğe bağlı description, startAt, endAt, tokenPrice ister. UUID’ler gerçek katalogdan gelmelidir. topic en fazla 160, description en fazla 5000 karakter; tokenPrice 0–3, süre en fazla 8 saattir.
+- PATCH /api/v1/listings/{id}: yalnız topic ve description desteklenir. Ders, konum, saat ve fiyatı değiştiren mock tam düzenleme bu endpoint’e aynen taşınamaz.
+- İlan silme endpoint’i yoktur. Mock deletePost için hayalî DELETE çağrısı veya sunucu başarı sonucu üretilemez.
 
-Durum, backend durum alanı bulunmadığı için bitiş zamanından türetilir: bitiş gelecekteyse Aktif, değilse Süresi Doldu / Geçmiş İlanlar. İptal/tamamlandı durumu uydurulmaz. applicationCount null ise başvuru sayısı gösterilmez; sıfır verilirse gösterilir. Gerçek durumlar ve başvuru sayıları API eşlemesi gerektirir.
+Post modeli ders/bölüm/konum gösterim adlarını tutar; courseId/locationId doğrudan alanı yoktur. Gerçek adaptörün güvenilir katalog kimliği eşlemesi gereklidir. Manuel ders başlığının backend’de courseId karşılığı yoksa ürün kararı gerekir; sahte UUID üretilmez.
 
-## Geçmiş ilanlarda işlem kısıtlaması
+supportsFullPostEditing varsayılan false’dur; yalnız mock tam düzenlemeyi açar. Gerçek adaptörde alan bazında kısıtlamalar sağlanmadan bayrak açılmamalıdır. updatePost/deletePost varsayılanları hata verir. Başarı ancak sunucu onayından sonra snapshot + notifyListeners ile yayınlanır; başarısız işlemde form ve son sağlam veri korunur.
 
-Proje dosyalarında ilan veya başvuru durum enum'u, tamamlanmayı doğrulayan veri, backend kaynak kodu ve OpenAPI sözleşmesi bulunamadı. Post modelinde yalnızca zamanlar ve isteğe bağlı applicationCount var; sayı başvuru durumu değildir. Bu nedenle yeni API alanı veya durum enum'u eklenmedi. Bitiş anı dahil geçmiş ilanlar Süresi Doldu olarak gösterilir; zamanın geçmesi Tamamlandı anlamına gelmez.
+## Mevcut durum ve güvenlik kontrolleri
 
-Geçmiş ilan kartları ve detayları yalnızca görüntülenir. Düzenle/sil butonları oluşturulmaz; detayda Başvur yoktur. Açık kalan düzenleme formunda kaydetme ve silme onayı sonrasında güncel repository kaydı yeniden kontrol edilir. InMemoryPostsRepository güncelleme ve silmeden önce requireMutablePost ile sahipliği ve kayıtlı bitiş zamanını doğrular. Düzenleme isteğindeki yeni tarihler eski kaydın geçmiş olmasını geçersiz kılamaz. Reddedilen işlemler snapshot'ı değiştirmez ve bildirim üretmez.
+PostStatus published, booked ve unknown içerir. Booked kaydı kişisel geçmişte kalır, keşifte gösterilmez ve düzenlenemez/silinemez. Zamanın geçmesi dersin tamamlandığını kanıtlamaz. Tamamlanma Application.completionStatus üzerinden değerlendirilir.
 
-Gerçek repository adaptörü aynı kontrolü istekten önce ve gecikmeli işlerde işlem anında uygulamalıdır. Backend düzenleme, silme ve başvuru işlemlerinde kimliği, kendi kayıtlı bitiş zamanını ve mevcut gerçek durumlarını sunucu saatiyle atomik olarak doğrulamalıdır. İstemcinin buton gizlemesi veya yeni tarih gönderimi yetki sağlamaz. Sunucu ret cevabında yerel kayıt silinmemeli/güncellenmemeli; güncel snapshot yenilenmelidir.
+Bitiş anı dahil geçmiş ilanlar salt okunurdur. requireMutablePost, güncel kayıt üzerinde kimlik, published durumu ve bitiş zamanını kontrol eder; payload’daki yeni tarih eski kaydı yeniden düzenlenebilir yapmaz. Kabul commit’i başvuru ve ilan snapshot’larını aynı yerel işlemde tutarlı günceller. Mock silme gerçek DB davranışı değildir.
 
-Entegrasyonda doğrulanması gereken eksikler: gerçek ilan/başvuru durum değerleri ve izin verilen geçişler; ders tamamlanmasının güvenilir kaynağı; hangi gerçek durumların ilanı geçmiş/salt okunur yaptığı; düzenleme/silme/başvuru için sunucu kuralları; saat dilimi ve yetkili sunucu zamanı; bu işlemlerin ret/hata sözleşmesi. Tamamlandı ancak doğrulanmış tamamlanma verisi eşlendiğinde gösterilebilir. Burada backend kodu bulunmadığı için sunucu tarafı kısıtlama uygulanmadı veya uygulanmış varsayılmadı.
+applicationCount yoksa sayı gösterilmez; mevcut backend pendingRequestCount değerinin eşlemesi açıkça yapılmalıdır. Gerçek sunucunun sahiplik, durum, zaman ve transaction kontrolleri istemci kontrollerinden bağımsızdır. Bakiye/token transferi Flutter’da yapılmaz.

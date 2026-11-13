@@ -1,3 +1,4 @@
+import 'package:studyco_mobile/features/messages/screens/chat_screen.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -237,10 +238,9 @@ void main() {
     );
     await tap(tester, bell);
     await tap(tester, previewCard(NotificationKind.newMessage));
-    expect(
-      find.text('Sohbet ekranı henüz kullanıma açık değil.'),
-      findsOneWidget,
-    );
+    expect(find.byType(ChatScreen), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     expect(find.byType(NotificationsScreen), findsOneWidget);
     expect(
       tester

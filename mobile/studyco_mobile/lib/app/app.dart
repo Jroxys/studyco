@@ -1,3 +1,10 @@
+import '../features/assistant/domain/assistant_repository.dart';
+import '../features/assistant/data/in_memory_assistant_repository.dart';
+import '../features/assistant/widgets/assistant_repository_scope.dart';
+import '../features/messages/domain/messages_repository.dart';
+import '../features/messages/data/in_memory_messages_repository.dart';
+import '../features/messages/widgets/messages_repository_scope.dart';
+import 'debug/messages_preview_data.dart';
 import '../features/posts/data/in_memory_posts_repository.dart';
 import '../features/profile/data/in_memory_profile_repository.dart';
 import '../features/profile/domain/profile_repository.dart';
@@ -34,12 +41,16 @@ class MyApp extends StatefulWidget {
     this.reviewsRepository,
     this.profileRepository,
     this.notificationsRepository,
+    this.messagesRepository,
+    this.assistantRepository,
   });
   final LocationCatalog? locationCatalog;
   final AcademicCatalog? academicCatalog;
   final ReviewsRepository? reviewsRepository;
   final ProfileRepository? profileRepository;
   final NotificationsRepository? notificationsRepository;
+  final MessagesRepository? messagesRepository;
+  final AssistantRepository? assistantRepository;
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -49,6 +60,7 @@ class _MyAppState extends State<MyApp> {
   InMemoryProfileRepository? _previewProfile;
   InMemoryPostsRepository? _previewPosts;
   InMemoryNotificationsRepository? _previewNotifications;
+  InMemoryMessagesRepository? _previewMessages;
   bool _previewEnded = false;
 
   Future<void> _endPreview() async {
@@ -57,12 +69,15 @@ class _MyAppState extends State<MyApp> {
     final profile = _previewProfile;
     final posts = _previewPosts;
     final notifications = _previewNotifications;
+    final messages = _previewMessages;
+    messages?.clearSession();
     setState(() {
       _previewEnded = true;
       _previewReviews = null;
       _previewProfile = null;
       _previewPosts = null;
       _previewNotifications = null;
+      _previewMessages = null;
     });
     // Let the old Navigator and its listeners unmount before disposing sources.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -70,6 +85,7 @@ class _MyAppState extends State<MyApp> {
       profile?.dispose();
       posts?.dispose();
       notifications?.dispose();
+      messages?.dispose();
     });
   }
 
@@ -81,6 +97,11 @@ class _MyAppState extends State<MyApp> {
       return;
     }
     _previewPosts ??= HomePreview.createRepository();
+    if (widget.messagesRepository == null) {
+      _previewMessages ??= previewMessages(
+        _previewPosts!.applicationsRepository.applications,
+      );
+    }
     if (widget.notificationsRepository == null) {
       _previewNotifications ??= InMemoryNotificationsRepository(
         userId: sampleHomeUser.postsOwnerId,
@@ -131,6 +152,7 @@ class _MyAppState extends State<MyApp> {
     _previewProfile?.dispose();
     _previewPosts?.dispose();
     _previewNotifications?.dispose();
+    _previewMessages?.dispose();
     super.dispose();
   }
 
@@ -168,7 +190,18 @@ class _MyAppState extends State<MyApp> {
                               ? null
                               : widget.notificationsRepository ??
                                   _previewNotifications,
-                      child: child!,
+                      child: MessagesRepositoryScope(
+                        repository:
+                            _previewEnded
+                                ? null
+                                : widget.messagesRepository ?? _previewMessages,
+                        child: AssistantRepositoryScope(
+                          repository:
+                              widget.assistantRepository ??
+                              InMemoryAssistantRepository.preview,
+                          child: child!,
+                        ),
+                      ),
                     ),
                   ),
                 ),

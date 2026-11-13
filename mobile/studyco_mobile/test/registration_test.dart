@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:studyco_mobile/app/app.dart';
+import 'support/login_app.dart';
 import 'package:studyco_mobile/app/theme/app_theme.dart';
 import 'package:studyco_mobile/features/auth/screens/register_screen.dart';
 import 'package:studyco_mobile/features/auth/validation/registration_validators.dart';
@@ -184,7 +184,7 @@ void main() {
   testWidgets(
     'Registration opens from login and returns without replacing it',
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      await pumpLoginApp(tester);
       await tester.ensureVisible(find.text('Kayıt Ol'));
       await tester.tap(find.text('Kayıt Ol'));
       await tester.pumpAndSettle();
@@ -223,7 +223,7 @@ void main() {
   testWidgets(
     'Registration checks consent and never reports account creation',
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      await pumpLoginApp(tester);
       await tester.ensureVisible(find.text('Kayıt Ol'));
       await tester.tap(find.text('Kayıt Ol'));
       await tester.pumpAndSettle();

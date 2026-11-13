@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:studyco_mobile/app/app.dart';
+import 'support/login_app.dart';
 import 'package:studyco_mobile/features/home/screens/counter_screen.dart';
 
 void main() {
-  testWidgets('Login is the initial screen and validates empty fields', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Login validates empty fields in the real app', (tester) async {
+    await pumpLoginApp(tester);
 
     expect(find.text('Hoş geldin!'), findsOneWidget);
     expect(find.byType(Image), findsOneWidget);
@@ -20,7 +18,7 @@ void main() {
   });
 
   testWidgets('Email validation and password visibility work', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpLoginApp(tester);
     await tester.enterText(find.byType(TextFormField).first, 'invalid');
     await tester.enterText(find.byType(TextFormField).last, 'secret');
     await tester.pump();
@@ -62,7 +60,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetViewInsets);
 
-    await tester.pumpWidget(const MyApp());
+    await pumpLoginApp(tester);
     tester.view.viewInsets = const FakeViewPadding(bottom: 280);
     await tester.pump();
     await tester.ensureVisible(find.text('Giriş Yap'));
@@ -76,7 +74,7 @@ void main() {
   testWidgets(
     'Login coalesces rapid button and Done submissions and permits retry',
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      await pumpLoginApp(tester);
       await tester.enterText(
         find.byType(TextFormField).first,
         'student@example.com',
@@ -86,9 +84,7 @@ void main() {
       final submit =
           tester.widget<FilledButton>(find.byType(FilledButton)).onPressed!;
       final done =
-          tester
-              .widget<TextField>(find.byType(TextField).last)
-              .onSubmitted!;
+          tester.widget<TextField>(find.byType(TextField).last).onSubmitted!;
 
       // Exercise stale callbacks before a rebuild can disable the button.
       submit();
@@ -117,7 +113,7 @@ void main() {
   testWidgets('Login submission remains safe when its screen is removed', (
     tester,
   ) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpLoginApp(tester);
     await tester.enterText(
       find.byType(TextFormField).first,
       'student@example.com',

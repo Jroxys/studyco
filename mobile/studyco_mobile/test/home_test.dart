@@ -1,3 +1,5 @@
+import 'package:studyco_mobile/features/assistant/widgets/assistant_sheet.dart';
+import 'package:studyco_mobile/features/messages/screens/conversations_screen.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -494,17 +496,17 @@ void main() {
   }
 
   testWidgets(
-    'Unimplemented destinations show honest messages without crashing',
+    'Messages opens its screen and unavailable destinations remain safe',
     (tester) async {
       await open(tester);
       final messages = find.byTooltip('Mesajlar');
       await tester.ensureVisible(messages);
       await tester.tap(messages);
       await tester.pumpAndSettle();
-      expect(
-        find.text('Mesajlar ekranı henüz kullanıma açık değil.'),
-        findsOneWidget,
-      );
+      expect(find.byType(ConversationsScreen), findsOneWidget);
+      expect(find.textContaining('doğrulanmış kullanıcı'), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Bildirimler'));
@@ -524,10 +526,10 @@ void main() {
       }
       await tester.tap(find.text('AI Asistan'));
       await tester.pumpAndSettle();
-      expect(
-        find.text('AI Asistan ekranı henüz kullanıma açık değil.'),
-        findsOneWidget,
-      );
+      expect(find.byType(AssistantSheet), findsOneWidget);
+      await tester.tap(find.byTooltip('Asistanı kapat'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AssistantSheet), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -599,13 +601,9 @@ void main() {
         expect(target.width, greaterThanOrEqualTo(48));
         expect(target.height, greaterThanOrEqualTo(48));
         final button = find.byTooltip(name);
-        final icon = find.descendant(of: button, matching: find.byType(Icon));
         final badge = find.descendant(of: button, matching: find.byType(Badge));
-        if (name == 'Bildirimler') {
-          expect(badge, findsNothing);
-        } else {
-          expect(tester.getRect(icon).overlaps(tester.getRect(badge)), isFalse);
-        }
+        // No repository is supplied, so neither icon claims an unread total.
+        expect(badge, findsNothing);
       }
       final nav = find.byKey(const ValueKey('home-nav-0'));
       final originalNav = tester.getRect(nav);

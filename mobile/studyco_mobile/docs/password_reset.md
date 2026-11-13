@@ -28,14 +28,16 @@ Her komutu önceki çalıştırmayı durdurduktan sonra kullanın.
 
 Normal akıştaki UnavailablePasswordResetRepository hiçbir işlem için başarı dönmez; ilk ekranda açık bir kullanılamıyor mesajı gösterilir. Altı haneli herhangi bir değer başarılı OTP kabul edilmez. `01:00` yalnızca pasif tasarım göstergesidir ve yanında aktif olmadığı belirtilir.
 
-Backend hazır olduğunda PasswordResetRepository için ASP.NET Core istemci implementasyonu ekleyin ve ForgotPasswordScreen'e enjekte edin. Bağlanacak işlemler:
+Teslim denetiminde yerel origin/integration/backend-flutter (786449e) kaynakları salt okunur incelendi. Gerçek backend Node.js + TypeScript + Fastify’dır; ASP.NET Core değildir. Aktif Flutter dalında PasswordResetRepository hâlâ UnavailablePasswordResetRepository ile çalışır; gerçek adaptör bağlı değildir.
 
-1. requestCode: e-posta gönderimi ve sunucunun challenge kimliği.
-2. resendCode: yeniden gönderim, güncel challenge ve sunucu yeniden gönderim sınırları.
-3. verifyCode: OTP kontrolü ve kısa ömürlü, yalnızca şifre sıfırlamaya yetkili sunucu token'ı.
-4. updatePassword: sunucunun doğruladığı reset token'ı ile yeni şifre kaydı.
+Doğrulanan backend işlemleri:
 
-Sunucu hata kodları, token süresi ve yeniden gönderim süresi API sözleşmesiyle birlikte ele alınmalıdır. Gerçek süre göstergesi sunucunun süre bilgisine bağlanmalıdır. Mevcut route akışı requestCode başarı vermeden doğrulama ekranını, verifyCode reset yetkisi vermeden yeni şifre ekranını açmaz. Güvenlik yetkisini her zaman backend doğrulamalıdır.
+1. POST /api/v1/auth/forgot-password: {email}, 202. Sunucu challenge kimliği veya reset grant token’ı döndürmez; yanıt e-posta varlığını da kanıtlamaz. Yeniden gönderim aynı endpoint’i kullanır.
+2. POST /api/v1/auth/reset-password: {email, code, newPassword}, başarı 204. OTP geçerliliğini ve yeni parolayı birlikte bu işlem doğrular. Ayrı verify-reset-code veya reset-grant endpoint’i yoktur.
+
+Flutter’ın requestCode/resendCode/verifyCode/updatePassword yöntemleri yerel UI soyutlamalarıdır, dört gerçek endpoint anlamına gelmez. Entegrasyon dalındaki RemotePasswordResetRepository, verifyCode adımında yalnız biçimi kontrol eder; bu adım sunucu tarafından doğrulanmış OTP veya sunucu grant’i gibi sunulmamalıdır. Gerçek yetki kontrolü reset-password çağrısındadır. Yerel ResetChallenge/ResetGrant modellerinin bu sözleşmeye nasıl eşleneceği entegrasyon ekibine aittir; hayalî sunucu token’ı veya endpoint eklenmez.
+
+Backend hata kodları ve süre politikaları adaptörde ele alınmalı; geçersiz/süresi dolan kodla şifre değişmiş gibi gösterilmemelidir. Başarılı sıfırlama sonrasındaki oturum iptali ve girişe dönüş ayrıca bağlanmalıdır. Bu denetimde gerçek e-posta, OTP veya parola değiştirme işlemi yapılmadı.
 
 Önizlemeyi kaldırmak için auth/debug/password_reset_preview.dart dosyasını silip app.dart içindeki import ve başlangıç route seçimini kaldırarak yalnızca LoginScreen home'unu bırakın.
 

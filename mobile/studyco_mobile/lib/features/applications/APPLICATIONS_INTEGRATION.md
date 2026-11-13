@@ -2,7 +2,7 @@
 
 ## Kaynak ve kapsam
 
-Yerel çalışma alanında backend kodu, SQL fonksiyonları ve OpenAPI belgesi bulunamadı. Aşağıdaki Node.js + TypeScript + Fastify sözleşmesi görevde verilen backend bilgileridir; bu checkout içinde canlı sunucuya bağlanılmadı. UI HTTP/SQL içermez. Mesajlar, Değerlendirmeler ve ders onaylama akışı bu görevin dışındadır.
+Aktif Flutter çalışma ağacında backend klasörü yoktur. Teslim denetiminde yerel Git nesnelerindeki origin/feature/backend (84059af) ve origin/integration/backend-flutter (786449e) Node.js + TypeScript + Fastify kaynakları salt okunur incelendi; canlı sunucu doğrulanmadı. UI HTTP/SQL içermez. Ders onayı ve değerlendirme mock akışları aşağıda açıklanır; mevcut Mesajlar bağlantısı için ../messages/MESSAGES_INTEGRATION.md belgesine bakın.
 
 Tek ApplicationsRepository hem gönderilen hem gelen başvuruları yönetir. PostsRepository.applicationsRepository bütün rotalara aynı kaynağı verir. InMemoryPostsRepository bu kaynağı ve yaşam döngüsünü yönetir; gerçek adaptörler varsayılan null kaynağa sessizce mock eklememelidir. ApplicationsScreen(incoming: true) farklı rolün listesini açar; filtre, kart, boş durum, detay paneli ve karar düğmeleri ortak bileşenlerdir.
 
@@ -14,9 +14,9 @@ Tek ApplicationsRepository hem gönderilen hem gelen başvuruları yönetir. Pos
 | Gelen Başvurular | GET /api/v1/me/requests?role=teacher | refreshIncoming(ownerId), forOwner |
 | Kabul | POST /api/v1/requests/{id}/accept; accept_lesson_request | accept(id, ownerId) |
 | Ret | POST /api/v1/requests/{id}/reject; reject_lesson_request | reject(id, ownerId) |
-| Tamamlanma onayı | POST /api/v1/requests/{id}/confirm | Henüz uygulanmadı |
+| Tamamlanma onayı | POST /api/v1/requests/{id}/confirm | confirmLesson; mock mevcut, HTTP adaptörü bekleniyor |
 
-student ve teacher bu işlemdeki rollerdir; kalıcı hesap tipi değildir. Başvuru oluşturma, kullanıcı iptali, tek request detayı ve tam ilan verisini getiren endpoint sözleşmeleri hâlâ doğrulanmalıdır. getForUser mevcut snapshot'tan iki rol için yetkili detayı döndürür; hayalî GET endpoint'i eklenmedi. Sayfalama zarfı, cursor, hata kodları ve mutasyon cevap şemaları doğrulanmadan REST adaptörü tamamlanmamalıdır.
+student ve teacher bu işlemdeki rollerdir; kalıcı hesap tipi değildir. Yerel backend kaynaklarında POST /api/v1/listings/{id}/requests, GET /api/v1/requests/{id} ve GET /api/v1/listings/{id} vardır. Kullanıcı başvuru iptali endpoint’i bulunmaz; yerel iptal gerçek API başarısı olarak sunulamaz. getForUser mevcut snapshot'tan iki rol için yetkili detayı döndürür; hayalî GET endpoint'i eklenmedi. Sayfalama zarfı, cursor, hata kodları ve mutasyon cevap şemaları doğrulanmadan REST adaptörü tamamlanmamalıdır.
 
 ## DTO ve kimlik eşlemesi
 
@@ -46,7 +46,7 @@ Gerçek backend accept_lesson_request içinde PUBLISHED/PENDING, sahiplik, başl
 
 ## Konuşma ve tamamlanma
 
-Verilen backend kuralına göre gerçek kabul sırasında konuşma kaydı oluşur. Sunucunun conversationId değeri DTO ve bütün kopyalama/iptal/kabul işlemlerinde korunur. Mock konuşma kaydı veya sahte conversationId üretmez; Mesajlar rotası açılmaz. Gerçek konuşma erişimi yine backend yetkisine bağlıdır; accepted etiketi tek başına yazma yetkisi sağlamaz.
+Verilen backend kuralına göre gerçek kabul sırasında konuşma kaydı oluşur. Sunucunun conversationId değeri DTO ve bütün kopyalama/iptal/kabul işlemlerinde korunur. Mock kabul işlemi yeni konuşma veya conversationId üretmez. Önceden kabul edilmiş HOME_PREVIEW fixture’larının açık mock conversationId değerleri vardır; bunlar mevcut Mesajlar kaynağıyla paylaşılır. Kabul edilmiş ve geçerli conversationId taşıyan katılımcı detayında Sohbete Git rotası açıktır. Gerçek konuşma erişimi yine backend yetkisine bağlıdır; accepted etiketi tek başına yazma yetkisi sağlamaz.
 
 ### İki taraflı ders onayı
 

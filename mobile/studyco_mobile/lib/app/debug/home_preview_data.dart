@@ -108,6 +108,10 @@ List<Application> previewCompletedApplications() => [
   for (final incoming in [false, true])
     Application(
       id: incoming ? 'mock-completed-incoming' : 'mock-completed-outgoing',
+      conversationId:
+          incoming
+              ? 'mock-conversation-incoming'
+              : 'mock-conversation-outgoing',
       postId:
           incoming
               ? 'mock-completed-owned-post'
@@ -153,6 +157,7 @@ Application previewConfirmableApplication({DateTime? now}) {
   const postId = 'mock-confirmable-post';
   return Application(
     id: 'mock-confirmable-lesson',
+    conversationId: 'mock-conversation-confirmable',
     postId: postId,
     applicantId: sampleHomeUser.postsOwnerId,
     teacherId: previewCompletionTeacher.postsOwnerId,

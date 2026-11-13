@@ -11,6 +11,7 @@ class HomeHeader extends StatelessWidget {
     required this.onProfile,
     this.isPreview = false,
     this.unreadNotifications = 0,
+    this.unreadMessages,
   });
   final UserProfile user;
   final VoidCallback onMessages;
@@ -18,6 +19,7 @@ class HomeHeader extends StatelessWidget {
   final VoidCallback onProfile;
   final bool isPreview;
   final int unreadNotifications;
+  final int? unreadMessages;
 
   Widget _badge(
     BuildContext context,
@@ -125,7 +127,7 @@ class HomeHeader extends StatelessWidget {
                 context,
                 'Mesajlar',
                 Icons.chat_bubble_outline,
-                user.unreadMessages,
+                unreadMessages ?? 0,
                 onMessages,
               ),
               const SizedBox(width: 4),

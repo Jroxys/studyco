@@ -1,3 +1,10 @@
+import '../../../app/routing/assistant_navigation.dart';
+import '../../assistant/data/in_memory_assistant_repository.dart';
+import '../../assistant/models/assistant_content.dart';
+import '../../assistant/widgets/assistant_repository_scope.dart';
+import '../../assistant/widgets/assistant_sheet.dart';
+import '../../messages/screens/conversations_screen.dart';
+import '../../messages/widgets/messages_repository_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../posts/domain/posts_repository.dart';
@@ -42,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _loading = true;
   String? _error;
   int _loadRequest = 0;
+  bool _assistantOpen = false;
   NotificationsRepository? _notifications;
 
   @override
@@ -136,6 +144,51 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Map<AssistantDestination, VoidCallback> _assistantActions() =>
+      AssistantNavigation.actions(
+        context,
+        user: _user,
+        posts: widget.repository,
+        onHome: () {},
+        onSearch: () => _destination('Ara'),
+        onProfile: () => _destination('Profilim'),
+        onCreatePost:
+            widget.onCreatePost == null
+                ? null
+                : () => _destination('İlan Oluştur'),
+      );
+
+  Future<void> _openAssistant() async {
+    if (_assistantOpen) return;
+    final userId = _user.id;
+    final source =
+        AssistantRepositoryScope.maybeOf(context) ??
+        InMemoryAssistantRepository.preview;
+    final available = _assistantActions().keys.toSet();
+    setState(() => _assistantOpen = true);
+    try {
+      final destination = await showAssistantSheet(
+        context,
+        repository: source,
+        availableDestinations: available,
+      );
+      if (!mounted || destination == null) return;
+      if (_user.id != userId) {
+        _message('Hesap değişti. Asistanı yeniden açabilirsin.');
+        return;
+      }
+      // Resolve again after dismissal in case a session source was removed.
+      final action = _assistantActions()[destination];
+      if (action == null) {
+        _message('Bu yönlendirme şu anda kullanılamıyor.');
+      } else {
+        action();
+      }
+    } finally {
+      if (mounted) setState(() => _assistantOpen = false);
+    }
+  }
+
   void _destination(String name) {
     if (name == 'Profilim' && widget.onDestination == null) {
       ProfileNavigation.open(
@@ -207,7 +260,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: HomeHeader(
                         user: _user,
                         isPreview: widget.isPreview,
-                        onMessages: () => _destination('Mesajlar'),
+                        onMessages: () {
+                          final source = MessagesRepositoryScope.forUser(
+                            context,
+                            _user.id,
+                          );
+                          Navigator.of(context).push<void>(
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => ConversationsScreen(
+                                    repository: source,
+                                    userId: _user.id,
+                                  ),
+                            ),
+                          );
+                        },
+                        unreadMessages:
+                            MessagesRepositoryScope.forUser(
+                              context,
+                              _user.id,
+                            )?.confirmedUnreadTotal,
                         unreadNotifications: _notifications?.unreadCount ?? 0,
                         onNotifications: _openNotifications,
                         onProfile: () => _destination('Profilim'),
@@ -355,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 alignment: Alignment.centerRight,
                 child: FilledButton.icon(
                   key: const ValueKey('home-ai'),
-                  onPressed: () => _destination('AI Asistan'),
+                  onPressed: _assistantOpen ? null : _openAssistant,
                   style: FilledButton.styleFrom(
                     backgroundColor: accent,
                     minimumSize: const Size(128, 40),

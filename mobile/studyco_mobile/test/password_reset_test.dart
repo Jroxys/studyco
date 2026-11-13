@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:studyco_mobile/app/app.dart';
+import 'support/login_app.dart';
 import 'package:studyco_mobile/app/theme/app_theme.dart';
 import 'package:studyco_mobile/features/auth/data/password_reset_repository.dart';
 import 'package:studyco_mobile/features/auth/debug/password_reset_preview.dart';
@@ -948,7 +948,7 @@ void main() {
   testWidgets(
     'Login opens reset; unavailable API prevents advancement; both back actions work',
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      await pumpLoginApp(tester);
       await tester.ensureVisible(find.text('Şifremi Unuttum'));
       await tester.tap(find.text('Şifremi Unuttum'));
       await tester.pumpAndSettle();

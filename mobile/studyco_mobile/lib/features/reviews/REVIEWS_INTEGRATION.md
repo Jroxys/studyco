@@ -2,7 +2,7 @@
 
 ## Kapsam ve backend
 
-Mevcut backend bilgisi: Node.js + TypeScript + Fastify, PostgreSQL. Bu checkout'ta backend kaynakları değiştirilmedi; Flutter'da gerçek HTTP/SQL çağrısı yok. Alınan değerlendirmelerin okunması, sayfalanması, görüntülenmesi ve tamamlanmış derslerde mock değerlendirme gönderimi desteklenir. İlan sahibi kartından alınan değerlendirmelerin okunması da aynı kaynakla desteklenir. Tam ilan sahibi profili, ders tamamlanma onayı ve Mesajlar bu kapsamda uygulanmadı.
+Mevcut backend bilgisi: Node.js + TypeScript + Fastify, PostgreSQL. Bu checkout'ta backend kaynakları değiştirilmedi; Flutter'da gerçek HTTP/SQL çağrısı yok. Alınan değerlendirmelerin okunması, sayfalanması, görüntülenmesi ve tamamlanmış derslerde mock değerlendirme gönderimi desteklenir. İlan sahibi kartından alınan değerlendirmelerin okunması da aynı kaynakla desteklenir. Tam ilan sahibi profili yoktur. Ders onayı ve Mesajlar artık ilgili modüllerde mock olarak vardır; ayrıntılar applications/APPLICATIONS_INTEGRATION.md ve messages/MESSAGES_INTEGRATION.md belgelerindedir.
 
 | Sağlanan endpoint | Kullanım |
 | --- | --- |
@@ -30,13 +30,13 @@ Backend yanıtı items ve nullable nextCursor içerir. limit varsayılan 20, en 
 
 Ekran ilk sayfayı alır; devam varsa Daha Fazla Göster sunar. Ek sayfa hatasında mevcut kartlar korunur ve aynı cursor ile yeniden deneme yapılır. Çift yükleme kilitlidir; kimlik/repository değişiminde eski cevap yeni kullanıcı ekranına yazılmaz. Aynı review ID tekrar gelirse sayım şişirilmez. Tekrarlayan cursor döngüsü hata olarak durdurulur.
 
-Mock cursor'ları yalnız mock kaynağına ve ilgili userId'ye aittir; diğer kullanıcının cursor'ı reddedilir. Bunlar backend cursor formatı değildir, gerçek REST adaptöründe kullanılmamalıdır. Mock koleksiyonlar snapshot olarak kopyalanır ve en yeni tarih/id sırasıyla sayfalanır. Gerçek sunucunun sıralama ve cursor tutarlılığı ayrıca doğrulanmalıdır.
+Mock cursor'ları yalnız mock kaynağına ve ilgili userId'ye aittir; diğer kullanıcının cursor'ı reddedilir. Bunlar backend cursor formatı değildir, gerçek REST adaptöründe kullanılmamalıdır. Mock koleksiyonlar snapshot olarak kopyalanır; createdAt DESC, eşit tarihte id ASC sıralıdır. Yerel backend createdAt DESC, id DESC döndürür. Eşit zamanlı kayıtların bu mock/sunucu farkı teslim notudur; gerçek adaptör sunucu sırasını korumalıdır.
 
 ## Güvenilir genel puan
 
 Ortalama sabit sayı değildir: geçerli kayıtların rating toplamı / benzersiz review sayısıdır; kayıt yoksa ortalama null ve Henüz değerlendirme yok gösterilir. İlk sayfada nextCursor varsa UI bu sayfanın ortalamasını genel puan gibi sunmaz. Genel puan için tüm değerlendirmeler yüklenmeli bilgisi ve yalnız yüklenen kayıt sayısı gösterilir; bu sayı toplam değerlendirme sayısı olarak etiketlenmez.
 
-Tüm sayfalar yüklendiğinde, nextCursor null olduğunda biriken benzersiz kayıtlar üzerinden özet hesaplanabilir. Değişen veri üzerinde çok sayfalı okuma snapshot garantisi sağlamayabilir. Büyük listeler ve tutarlı gerçek genel puan için backend'den tüm kayıtları kapsayan güvenilir toplam sayı ve puan toplamı/ortalaması gerekir; sağlanan API sözleşmesinde böyle bir özet alanı/endpoint'i yoktur. Yeni isim veya endpoint uydurulmadı. Backend ekibi auth, tutarlılık ve response sözleşmesini netleştirmelidir.
+Tüm sayfalar yüklendiğinde, nextCursor null olduğunda biriken benzersiz kayıtlar üzerinden özet hesaplanabilir. Değişen veri üzerinde çok sayfalı okuma snapshot garantisi sağlamayabilir. Büyük listeler ve tutarlı gerçek genel puan için backend'den tüm kayıtları kapsayan güvenilir toplam sayı ve puan toplamı/ortalaması gerekir; değerlendirme listeleme zarfında bu özet yoktur. Ancak yerel backend’in mevcut GET /api/v1/users/{id} yanıtında ratingAverage ve ratingCount alanları vardır. Bu endpoint yeni bir öneri değil, incelenen gerçek kaynaktır. Mevcut ReviewStatistics modeli count + tamsayı totalRating tuttuğundan bu özetin güvenilir eşlenmesi ayrıca ele alınmalı; eksik sayfadan toplam puan veya yuvarlanmış ortalamadan kesin toplam uydurulmamalıdır. Backend ekibi auth, tutarlılık ve response sözleşmesini netleştirmelidir.
 
 ReviewPage.overall opsiyonel DOMAIN metaverisidir; mevcut API response alanı değildir. Mock bütün kullanıcı kayıtlarını bildiği için bunu tamamından hesaplayıp verir; ilk 20 kayıttan hesaplamaz. Gerçek DTO mapper'ı overall üretmez. Gelecekte gerçek adaptör ancak doğrulanmış, bütün veri kümesini kapsayan güvenilir istatistik kaynağı olduğunda bu metaveriyi sağlamalıdır. Başarısız yükleme boş liste/0 puan olarak sunulmaz.
 

@@ -1,3 +1,4 @@
+import '../../messages/widgets/conversation_navigation.dart';
 import 'dart:async';
 import '../../reviews/widgets/review_request_action.dart';
 import 'package:flutter/material.dart';
@@ -1079,6 +1080,26 @@ class _ApplicationDetailsSheetState extends State<_ApplicationDetailsSheet> {
                             ),
                             const SizedBox(height: 12),
                           ],
+                          if (application.status ==
+                                  ApplicationStatus.accepted &&
+                              !application.isLocallyCancelled &&
+                              application.conversationId?.trim().isNotEmpty ==
+                                  true &&
+                              application.participantFor(
+                                    widget.user.id ?? '',
+                                  ) !=
+                                  null)
+                            OutlinedButton.icon(
+                              key: const ValueKey('application-chat'),
+                              onPressed:
+                                  () => ConversationNavigation.open(
+                                    context,
+                                    userId: widget.user.id,
+                                    conversationId: application.conversationId,
+                                  ),
+                              icon: const Icon(Icons.chat_bubble_outline),
+                              label: const Text('Sohbete Git'),
+                            ),
                           ReviewRequestAction(
                             application: application,
                             user: widget.user,

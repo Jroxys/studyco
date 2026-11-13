@@ -1,9 +1,7 @@
 # messages
 
-Sorumluluk: Kullanıcılar arası mesajlaşma.
+Kabul edilmiş başvurulara ait Mesajlar ve Sohbet Detayı ekranları.
+UI HTTP bilmez; MessagesRepository / MessagesRepositoryScope üzerinden çalışır.
+HOME_PREVIEW mock verileri app/debug/messages_preview_data.dart içinde birleştirilir.
 
-Henüz ekran veya iş mantığı uygulanmamıştır.
-
-İhtiyaç oldukça screens/ (ekranlar), widgets/ (modüle özel bileşenler),
-models/ (veri modelleri) ve data/ (veri erişimi) eklenir.
-API ve veritabanı kodu henüz bulunmaz. Kurallar için kök README.md dosyasına bakın.
+Sözleşme, kaynak dallar, mock sınırları ve bağlantı noktaları için [MESSAGES_INTEGRATION.md](MESSAGES_INTEGRATION.md).

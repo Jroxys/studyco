@@ -1,3 +1,4 @@
+import '../../messages/widgets/conversation_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../applications/screens/applications_screen.dart';
 import '../../posts/domain/posts_repository.dart';
@@ -106,7 +107,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (!mounted || !identical(source, _source)) return;
 
     if (current.target == NotificationTarget.conversation) {
-      _message('Sohbet ekranı henüz kullanıma açık değil.');
+      _openingTarget = true;
+      try {
+        await ConversationNavigation.open(
+          context,
+          userId: widget.user.id,
+          conversationId: current.targetId,
+        );
+      } finally {
+        _openingTarget = false;
+      }
       return;
     }
     final id = current.targetId;
