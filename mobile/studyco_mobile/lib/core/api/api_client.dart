@@ -5,11 +5,22 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Backend base URL. Override with `--dart-define=API_BASE_URL=http://host:3000`.
+/// On the web the API is assumed on port 3000 of the host that served the
+/// page, so a phone opening `http://COMPUTER_IP:8080` reaches that computer.
 /// The Android emulator reaches the host machine through 10.0.2.2.
 String defaultApiBaseUrl() {
   const configured = String.fromEnvironment('API_BASE_URL');
   if (configured.isNotEmpty) return configured;
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+  if (kIsWeb) {
+    final page = Uri.base;
+    final host = page.host.isEmpty ? '127.0.0.1' : page.host;
+    return Uri(
+      scheme: page.scheme == 'https' ? 'https' : 'http',
+      host: host,
+      port: 3000,
+    ).toString();
+  }
+  if (defaultTargetPlatform == TargetPlatform.android) {
     return 'http://10.0.2.2:3000';
   }
   return 'http://127.0.0.1:3000';

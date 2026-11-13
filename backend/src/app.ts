@@ -83,7 +83,12 @@ export function buildApp(dependencies: AppDependencies = {}): FastifyInstance {
   app.setSerializerCompiler(serializerCompiler);
 
   app.register(helmet);
-  app.register(cors, { origin: appConfig.corsOrigin });
+  // Development accepts any browser origin so the Flutter web build can be served
+  // from another port or from this machine's LAN address. Other environments
+  // keep the single configured origin.
+  app.register(cors, {
+    origin: appConfig.nodeEnv === 'development' ? true : appConfig.corsOrigin
+  });
   app.register(rateLimit, {
     max: appConfig.rateLimitMax,
     timeWindow: appConfig.rateLimitWindow
