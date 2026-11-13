@@ -48,6 +48,28 @@ describe('buildApp', () => {
     expect((await production.inject({ method: 'GET', url: '/openapi.json' })).statusCode).toBe(404);
   });
 
+  it('allows any browser origin only in development', async () => {
+    const preflight = {
+      method: 'OPTIONS' as const,
+      url: '/api/v1/health',
+      headers: {
+        origin: 'http://192.168.1.20:8080',
+        'access-control-request-method': 'GET'
+      }
+    };
+    const development = buildApp({ config: loadConfig({ NODE_ENV: 'development' }) });
+    apps.push(development);
+    expect((await development.inject(preflight)).headers['access-control-allow-origin']).toBe(
+      'http://192.168.1.20:8080'
+    );
+
+    const test = buildApp({ config: loadConfig({ NODE_ENV: 'test' }) });
+    apps.push(test);
+    expect((await test.inject(preflight)).headers['access-control-allow-origin']).toBe(
+      'http://localhost:3000'
+    );
+  });
+
   it('returns a generic body for unexpected errors', async () => {
     const app = buildApp();
     apps.push(app);

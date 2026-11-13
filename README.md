@@ -36,6 +36,18 @@ flutter pub get
 flutter run            # iOS simülatörü 127.0.0.1'e, Android emülatörü 10.0.2.2'ye bağlanır
 ```
 
+### Web sürümü (sunum için en kolayı)
+
+```bash
+cd backend && HOST=0.0.0.0 npm run dev                     # 1. terminal
+cd mobile/studyco_mobile && flutter build web --release   # kod değişince bir kez
+cd build/web && python3 -m http.server 8080 --bind 0.0.0.0 # 2. terminal
+```
+
+Bilgisayarda `http://127.0.0.1:8080` adresini aç. Aynı Wi-Fi'deki bir telefondan açmak için
+`http://BILGISAYARIN_IP_ADRESI:8080` kullan (IP: `ipconfig getifaddr en0`). Web sürümü API'yi
+sayfanın geldiği makinenin 3000 portunda arar. Geliştirme modunda backend her tarayıcı adresinden gelen isteği kabul eder.
+
 - Gerçek bir telefonda çalıştırırken backend'i `HOST=0.0.0.0` ile başlat ve uygulamaya bilgisayarın IP adresini ver:
   `flutter run --dart-define=API_BASE_URL=http://192.168.1.20:3000`
 - Geliştirmede `SMTP_URL` boş bırakılırsa doğrulama ve şifre sıfırlama kodları backend log'una yazılır.
